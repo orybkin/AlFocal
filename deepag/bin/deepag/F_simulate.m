@@ -54,8 +54,10 @@ if old_version && false
         F{1} = F{1}/norm(F{1});  [~,mi] = max(abs(F{1})); F{1} = F{1}*sign(F{1}(mi));
     end
 else
+    %% using scene generator from Zuzana.
+    % beware, hacky rescaling. 
     sceneType = {'randombox' 'random'};
-    pixel = 1/1000;
+    pixel = 1/1000; %rescaling to pixels. in the output of GenerateScene the image will be always between -1 and 1, they say, so 2000 pixels
     noise = Fparam.noise*pixel;
     f1=Fparam.f1*pixel;
     f2=Fparam.f2*pixel;
@@ -65,19 +67,18 @@ else
     Kgt2 = diag([f2 f2 1]);
     gtk1 = 0;
     gtk2 = 0;
-    [Pgt M m mgt] = GenerateScene(Npoints, [4000*pixel 4000*pixel], Ncams, 5000*pixel, 8000*pixel, 0, noise, [Kgt1;Kgt2], sceneType, [], [], [gtk1,gtk2], true);
-    Kgt{1} = Kgt1; Kgt{2}=Kgt2;
-    %ShowCameras(Pgt, Kgt, m, M, true, false, true, 1:7, mgt); %show plots
+    [~, ~, m, ~] = GenerateScene(Npoints, [4000*pixel 4000*pixel], Ncams, 5000*pixel, 8000*pixel, 0, noise, [Kgt1;Kgt2], sceneType, [], [], [gtk1,gtk2], true);
     sample=randperm(size(m{1},2),Fparam.corr);
-    u={m{1}(:,sample)/pixel m{2}(:,sample)/pixel};
+    u={m{1}(:,sample)/pixel m{2}(:,sample)/pixel}; %rescaling back
     [F{1},A{1}]=F_features(u{1}, u{2});
-    u={u{1}*A{1}{1}(1) u{2}*A{1}{2}(1)};
+    u={u{1}*A{1}{1}(1) u{2}*A{1}{2}(1)}; %rescaling forth. u is now in the same scale as F, but f isn't.
 end
 end
 
 
 function [F,A]=simulate_corr(P1,P2,sc,noise,Fparam, method)
 %calculate F matrix from random correspondences
+%part of old version
 
 global ps;
 % 3D points
