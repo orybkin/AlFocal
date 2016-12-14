@@ -8,12 +8,19 @@
 %                '[-1,1]' = ranges of points are scaled to interval [-1,1]x[-1,1]
 %       mth{2} = constraints on F imposed
 %                'Free'  = no constraints, i.e. |F|=0 not required (works for 8 and more matches)
-%                '|F|=0' = rank two F imposed (works for 7 and more matches) 
+%                '|F|=0' = rank two F imposed (works for 7 and more matches)
+%                ' '
 % F   = Fundamental matrix u2'*F*u1 = 0
 % A   = normalization transforms: F = A{2}'*Fn*A{1};  u{2}'*A{2}'*Fn*A{1}*u{1}->0 => Fn
 %
 % T. Pajdla, pajdla@cvut.cz, 2016-09-11
-function [F,A] = uu2F(u,mth)
+function [F,A,focal] = uu2F(u,mth,testset)
+if nargin<3
+    testset={NaN};
+end
+global original_solver;
+original_solver=false;
+focal={NaN};
 if nargin>0
     if nargin<2
         mth = {'HZ','Free'};
@@ -38,13 +45,29 @@ if nargin>0
     end
     % normalize
     x = {A{1}*a2h(u{1}) A{2}*a2h(u{2})};
-    B = zeros(size(x{1},2),9);
-    % B * f = 0
-    for i=1:size(x{1},2)
-        B(i,:) = m2v(x{1}(:,i)*x{2}(:,i)');
+    switch mth{2}
+        case 'Prop6'
+            n=size(x{1},2);
+            per=perms(1:n);
+            f=cell(1,n);
+            for j=1:n
+                x_t = {x{1}(:,per(j,:)) x{2}(:,per(j,:))};
+                B = zeros(size(x_t{1},2),9);
+                % B * f = 0
+                for i=1:size(x_t{1},2)
+                    B(i,:) = m2v(x_t{1}(:,i)*x_t{2}(:,i)');
+                end
+                [~,~,f{j}]=svd(B,0);
+            end
+        otherwise
+            B = zeros(size(x{1},2),9);
+            % B * f = 0
+            for i=1:size(x{1},2)
+                B(i,:) = m2v(x{1}(:,i)*x{2}(:,i)');
+            end
+            % f is the null space of B
+            [~,~,f] = svd(B,0);
     end
-    % f is the null space of B
-    [~,~,f] = svd(B,0);
     switch mth{2}
         case 'Free'
             if size(B,1)<8
@@ -60,10 +83,10 @@ if nargin>0
             % to avoid division by zero and avoid t going to infty
             N{1} = reshape(f(:,end-1),3,3)';
             N{2} = reshape(f(:,end),3,3)';
-            a = [det(N{2}) 
+            a = [det(N{2})
                 (det([N{1}(:,1) N{2}(:,[2 3])])-det([N{1}(:,2) N{2}(:,[1 3])])+det([N{1}(:,3) N{2}(:,[1 2])]))
                 (det([N{2}(:,1) N{1}(:,[2 3])])-det([N{2}(:,2) N{1}(:,[1 3])])+det([N{2}(:,3) N{1}(:,[1 2])]))
-                 det(N{1})];
+                det(N{1})];
             if abs(a(end))>abs(a(1)) % choose the larger value
                 a = a(end:-1:1);
                 ix = [1 2]; % det(t*F1+F2) = a'*[1;t;t^2;t^3]
@@ -78,76 +101,139 @@ if nargin>0
             for i=1:numel(t)
                 F(:,:,i) = t(i)*N{ix(1)}+N{ix(2)};
             end
+        case 'Prop'
+            % estimate and use the value of f1/f2 for subsequent
+            % opimalization of result
+            
+            % using third smaller singular value to compensate for one
+            % extra equation
+            
+            %f1/f2 estimated by calling uu2F
+            prop=getFProp(u,testset);           
+            [F,focal]=propdet2F(f,prop);
+        case 'Prop6'
+            % same as above, but using averaging over different subsets'
+            % solutions
+            
+            %f1/f2 estimated by calling uu2F
+            prop=getFProp(u,testset);
+            F=cell(1,n);
+            for i=1:n
+                [F{i},focal{i}]=propdet2F(f{i},prop);
+            end
         otherwise
             error([mth{2} ' not implemented']);
     end
     % denormalize: u2'*Fa*u1 = u2'*A2'*F*A1*u1 => Fa = A2'*F*A
-    for i=1:size(F,3)
-        F(:,:,i) = A{2}'*F(:,:,i)*A{1};
+    switch mth{2}
+        case 'Prop6'
+            for j=1:size(F,2)
+                for i=1:size(F{j},3)
+                    F{j}(:,:,i) = A{2}'*F{j}(:,:,i)*A{1};
+                end
+            end
+        otherwise
+            for i=1:size(F,3)
+                F(:,:,i) = A{2}'*F(:,:,i)*A{1};
+            end
     end
 else % unit tests
-    % test 1 
+    % test 1
     X = [0 1 1 0 0 1 2 0
-         0 0 1 1 0 0 1 1
-         0 0 0 0 1 2 1 2];
+        0 0 1 1 0 0 1 1
+        0 0 0 0 1 2 1 2];
     P1 = [1 0 0 1
-          0 1 0 0
-          0 0 1 1];
+        0 1 0 0
+        0 0 1 1];
     P2 = [1 0 0 0
-          0 1 0 1
-          0 0 1 1];
+        0 1 0 1
+        0 0 1 1];
     u1 = X2u(X,P1);
     u2 = X2u(X,P2);
-    Fo = uu2F({u1,u2},{'[-1,1]','Free'}); 
+    Fo = uu2F({u1,u2},{'[-1,1]','Free'});
     Fo = Fo/norm(Fo);
     F(1) = max(abs(sum(u2.*(Fo*u1))))<1e-8;
     % test 2
-    E = E5ptNister([u1(:,1:5);u2(:,1:5)]);     
+    E = E5ptNister([u1(:,1:5);u2(:,1:5)]);
     F(2) = norm(E{end}-Fo/norm(Fo,2),2)<1e-8;
     % test 3
-    Fo = uu2F({u1(:,1:8),u2(:,1:8)},{'[-1,1]','|F|=0'}); 
+    Fo = uu2F({u1(:,1:8),u2(:,1:8)},{'[-1,1]','|F|=0'});
     for i=1:size(Fo,3)
         Fo(:,:,i) = Fo(:,:,i)/norm(Fo(:,:,i));
         e(i) = max(abs(sum(u2.*(Fo(:,:,i)*u1))));
     end
-    F(3) = any(e<1e-10);    
+    F(3) = any(e<1e-10);
     % test 4
     P1 = rand(3,4);
     P2 = rand(3,4);
     u1 = X2u(X,P1);
     u2 = X2u(X,P2);
     Fo = uu2F({u1,u2},{'[-1,1]','Free'});
-    Fo = Fo/norm(Fo);    
+    Fo = Fo/norm(Fo);
     F(4) = max(abs(sum(u2.*(Fo*u1))))<1e-10;
     % test 5
     Fo = uu2F({u1,u2},{'[-1,1]','|F|=0'});
     for i=1:size(Fo,3)
         Fo(:,:,i) = Fo(:,:,i)/norm(Fo(:,:,i));
         e(i) = max(abs(sum(u2.*(Fo(:,:,i)*u1))));
-    end    
-    F(5) = min(e)<1e-10;    
+    end
+    F(5) = min(e)<1e-10;
     % test 6 & 7
     P1 = [1 0 0 0
-          0 1 0 0
-          0 0 1 0];
-    P1(:,4) = rand(3,1);  
+        0 1 0 0
+        0 0 1 0];
+    P1(:,4) = rand(3,1);
     P2 = [1 0 0 0
-          0 1 0 0
-          0 0 1 0];  
+        0 1 0 0
+        0 0 1 0];
     P2(:,4) = rand(3,1);
     X = rand(3,8);
     u1 = X2u(X,P1);
-    u2 = X2u(X,P2);    
+    u2 = X2u(X,P2);
     Fo = uu2F({u1,u2},{'HZ','Free'});
     Fo = Fo/norm(Fo);
     Fd = uu2F({u1,u2},{'[-1,1]','|F|=0'});
     for i=1:size(Fd,3)
         Fd(:,:,i) = Fd(:,:,i)/norm(Fd(:,:,i));
         e(i) = max(abs(sum(u2.*(Fd(:,:,i)*u1))));
-    end    
+    end
     [~,ie] = min(e);
     Fd = Fd(:,:,ie);
-    E = E5ptNister([u1(:,1:5);u2(:,1:5)]);    
-    F(6) = norm(E{end}/E{end}(1,3)-Fo/Fo(1,3),2)<1e8;    
-    F(7) = (norm(Fd/Fd(1,3)-Fo/Fo(1,3),2)<1e8) && (min(svd(Fd))<1e-14);    
+    E = E5ptNister([u1(:,1:5);u2(:,1:5)]);
+    F(6) = norm(E{end}/E{end}(1,3)-Fo/Fo(1,3),2)<1e8;
+    F(7) = (norm(Fd/Fd(1,3)-Fo/Fo(1,3),2)<1e8) && (min(svd(Fd))<1e-14);
+end
+end
+
+function  prop=getFProp(u,testset)
+if size(u,2)>7
+    Fund=F_features(u{1}, u{2}, 'Free', testset);
+else
+    Fund=F_features(u{1}, u{2}, '|F|=0', testset);
+end
+focal=F2f1f2(Fund);
+prop=abs(focal(2))/abs(focal(1));
+%prop=1.33;
+end
+
+function [F,focal]=propdet2F(f,prop)
+global original_solver;
+N{1} = reshape(f(:,end-2),3,3)';
+N{2} = reshape(f(:,end-1),3,3)';
+N{3} = reshape(f(:,end),3,3)';
+if original_solver    
+    %reshaper=@(f,prop) reshape(diag([1 1 1/prop])*reshape(f,3,3,[]),size(f));
+    [coef1,coef2,focal]=solver_sw6pt(diag([1 1 1/prop])*N{1},diag([1 1 1/prop])*N{2},diag([1 1 1/prop])*N{3});
+else
+    [coef1,coef2,focal]=sw6pt_prop_wrap(prop,N{1},N{2},N{3});
+end
+sieve= abs(imag(focal))<eps; % select real solutions?
+focal = focal(sieve);
+coef1 = coef1(sieve);
+coef2 = coef2(sieve);
+focal=sqrt(1./focal); 
+F = zeros(3,3,numel(focal));
+for i=1:numel(focal)
+    F(:,:,i) = coef1(i)*N{1}+coef2(i)*N{2}+N{3};
+end
 end

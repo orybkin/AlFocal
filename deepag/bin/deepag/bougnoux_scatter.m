@@ -42,13 +42,13 @@ stat_data(:,3)=[getmean(propR) getmean(propA)];
 stat_data(:,4)=[getstd(propR) getstd(propA)];
 
 %plot
-scatter(difg(choice,1),difg(choice,2),'b+','DisplayName','real answer');
+s1=scatter(difg(choice,1),difg(choice,2),'b+','DisplayName','real answer');
 hold on
 if any(unchoice==1)
-    scatter(difg(unchoice,1),difg(unchoice,2),'r+','DisplayName','abs(imaginary answer)');
+    s2=scatter(difg(unchoice,1),difg(unchoice,2),'r+','DisplayName','abs(imaginary answer)');
 end
 %triffles
-legend('-DynamicLegend');
+[~,~]=legend('-DynamicLegend'); % don't change this line - it fixes a Matlab bug
 title({['Bougnoux formula estimation from ' int2str(corr) ' correspondences.  method = ' method], ...
     [ '[real all] : mean error = ' mat2str(stat_data(:,1),3) '; std = ' mat2str(stat_data(:,2),3)]});
 xlabel('abs(f2)');
@@ -85,11 +85,13 @@ for i=1:n
     u2=reshape(uvector(end/2+1:end), 2, points);
     %truncating
     sample=randperm(size(u1,2),corr);
+    testsample=setdiff(1:size(u1,2),sample);
+    testset={u1(:,testsample) u2(:,testsample)};
     u1=u1(:,sample);
     u2=u2(:,sample);
         
     %calculate
-    [focal,A]=F_features(u1,u2,method);
+    [focal,A]=F_features(u1,u2,method,testset);
     estion(i,:)=F2f1f2(reshape(focal,3,3));
     estion(i,:)=estion(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
     truth(i,:)=truth(i,:).*norm_(i,:);

@@ -16,15 +16,15 @@ if calculating
     file='../../data/paris/correspondences_F_synth_1K.mat';
     %file='../../data/paris/correspondences_F.mat';
     corr=[7:17 18:3:29 30:5:49 50:10:100];  % numbers of correspondences - x axis
-    corr=[7:20];
+    %corr=[7:20];
     %corr=[8:12];
-    %corr=[7:9];
+    corr=[7:9];
     %corr=[8];
-    pop_size=1000; % number of points that will be on scatter plot
+    pop_size=10; % number of points that will be on scatter plot
     n=size(corr,2); % x axis length
     clear data stat_data
-    stat_data=NaN(4,n,4);
-    data=cell(4,n,2);
+    stat_data=NaN(6,n,4);
+    data=cell(6,n,2);
         
     % size(stat_data):=(methods, n, parameters), where:
     % methods are as in the legend below
@@ -41,8 +41,14 @@ if calculating
             [stat_temp, data_temp]=bougnoux_scatter(file,corr(i),pop_size,'Free');
             data(1:2,i,:)=resh22(data_temp);
             stat_data(1:2,i,:)=perm32(stat_temp);
+            
+            [stat_temp, data_temp]=bougnoux_scatter(file,corr(i),pop_size,'Prop');
+            data(5:6,i,:)=resh22(data_temp);
+            stat_data(5:6,i,:)=perm32(stat_temp);
         else
             data(1:2,i,:)={[]};
+            
+            data(5:6,i,:)={[]};
         end
         [stat_temp, data_temp]=bougnoux_scatter(file,corr(i),pop_size,'|F|=0');
         data(3:4,i,:)=resh22(data_temp);
@@ -55,7 +61,9 @@ if plotting
     clear titles legends ylabels names
     
     titles(1)={'Error of estimating (f1,f2)'};
-    legends(1,:)={'only real f', 'all f','singularized F, only real f', 'singularized F, all f'};
+    legends(1,:)={'only real f', 'all f', ... 
+        'singularized F, only real f', 'singularized F, all f',...
+        'using proportion est., only real f', 'using proportion est., all f'};
     ylabels(1)={'mean of f1/f1_true'};
     names(1)={'bougnoux/error'};
     
@@ -76,7 +84,8 @@ if plotting
     
     for i=1:4
         plot(corr,abs(stat_data(1,:,i)), 'bx-',corr,abs(stat_data(2,:,i)),'rx-' ...
-            ,corr,abs(stat_data(3,:,i)), 'mx-',corr,abs(stat_data(4,:,i)),'kx-');
+            ,corr,abs(stat_data(3,:,i)), 'mx-',corr,abs(stat_data(4,:,i)),'kx-' ...
+            ,corr,abs(stat_data(5,:,i)), 'yx-',corr,abs(stat_data(6,:,i)),'cx-');
         legend(legends(i,:));
         title(titles(i));
         xlabel('number of correspondences');
@@ -92,8 +101,9 @@ end
 
 if boxplotting
     clear titles legends ylabels names
-    titlesi={'Only real f', 'All f','Singularized F, only real f', 'Singularized F, all f'};
-    namesi={'real','all','sinreal','sinall'};
+    titlesi={'Only real f', 'All f','Singularized F, only real f', 'Singularized F, all f' , ...
+        'using proportion est., only real f', 'using proportion est., all f'};
+    namesi={'real','all','sinreal','sinall','propreal','propall'};
     %
     titles(1)={'Estimating (f1,f2)'};
     legends(1,:)={'f/f_true','ground truth'};
@@ -103,7 +113,7 @@ if boxplotting
     legends(2,:)={'f1/f2-f1_true/f2_true','ground truth'};
     names(2)={'bougnoux/boxplot_proportion'};
     
-    for i=1:4
+    for i=1:6
         for j=1:2
             %reformatting for dropbox grouping variable. 
             %with preallocation
@@ -125,7 +135,7 @@ if boxplotting
             end
             
             %plotting
-            if i<3 && corr(1)==7
+            if (i<3 || i>4) && corr(1)==7
                 corrdisp=corr(2:end);
             else
                 corrdisp=corr;

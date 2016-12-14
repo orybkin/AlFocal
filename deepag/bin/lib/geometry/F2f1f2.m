@@ -23,8 +23,8 @@ if nargin>0
             II = diag([1 1 0]);
             p1 = a2h(p{1});
             p2 = a2h(p{2});
-            f(1) = sqrt((-p2'*xx(e2)*II*F *(p1*p1')*F'*p2)/(p2'*xx(e2)*II*F *II*F'*p2));
-            f(2) = sqrt((-p1'*xx(e1)*II*F'*(p2*p2')*F *p1)/(p1'*xx(e1)*II*F'*II*F *p1));
+            f(1) = sqrt((-p2'*xx(e2)*II*F *(p1*p1')*F'*p2)/(p2'*xx(e2)*II*F *II*F'*p2));  
+            f(2) = sqrt((-p1'*xx(e1)*II*F'*(p2*p2')*F *p1)/(p1'*xx(e1)*II*F'*II*F *p1));  
     end
 else % unit tests
     p = {[500;600] [500;400]};

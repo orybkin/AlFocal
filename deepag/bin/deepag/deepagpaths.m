@@ -7,4 +7,5 @@ addpath(fullfile(pwd ,'..','lib','pargui'));
 addpath(fullfile(pwd ,'..','lib','geometry'));
 addpath(fullfile(pwd ,'..','lib','matconvnet/matlab'));
 addpath(fullfile(pwd ,'..','lib','APT'));
-addpath(fullfile(pwd ,'scene_generator'));
+addpath(fullfile(pwd ,'..','lib','scene_generator'));
+addpath(fullfile(pwd ,'..','lib','generated_solvers'));

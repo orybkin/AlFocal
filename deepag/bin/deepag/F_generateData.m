@@ -10,7 +10,7 @@ per_corr=1; % samples (with different noise) per correspondence set
 corrnum=20; % number of correspondences in simulation
 tic();
 trSize = 100*1000;
-valSize = 1*100;
+valSize = 1*1000;
 train = 0; % whether the set should be training or validating
 saveFeatures=false;
 saveCorrs=true;
