@@ -78,30 +78,6 @@ suptitle('additive errors in ratio w.r.t. axes distance')
 
 end
 
-function estdata=get_foc_error(estion,truth)
-% get focal length error
-bigger=abs(estion(:,1))>abs(truth(:,1));
-estdata(bigger)=abs(truth(bigger,1))./abs(estion(bigger,1));
-estdata(not(bigger))=abs(estion(not(bigger),1))./abs(truth(not(bigger),1));
-estdata=1-estdata;
-end
-
-function estdata=get_rat_error_mult(estion,truth)
-estion=estion(:,1)./estion(:,2);
-truth=truth(:,1)./truth(:,2);
-
-estdata=get_foc_error(estion,truth);
-end
-
-function estdata=get_rat_error_add(estion,truth)
-% get additive focal lengths ratio error
-estion=estion(:,1)./estion(:,2);
-truth=truth(:,1)./truth(:,2);
-estdata=abs(estion)-abs(truth);
-% remove outliers
-estdata=estdata(estdata<10);
-end
-
 function [estion,truth]=calcFocals(corr,n,method,noise,axdist)
 %get n focal length estimations of the bougnoux formula on corr coordinates from the data in
 %specified file

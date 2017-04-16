@@ -13,8 +13,8 @@ end
 
 [estion,baseline,truth]=calcFocals(file,corr,pop_size, noise);
 
-basedata=diffify(baseline,truth);
-estdata=diffify(estion,truth);
+basedata=get_foc_err(baseline,truth);
+estdata=get_foc_err(estion,truth);
 
 % histogram errors
 figure();
@@ -24,15 +24,6 @@ cumhist(sort(basedata),20,1,'-r');
 hold off
 legend('Prior','7pt')
 end    
-
-function estdata=diffify(estion,truth)
-%transform data to difference of f-Ratio and ground truth f-Ratio (errors)
-
-bigger=abs(estion(:,1))>abs(truth(:,1));
-estdata(bigger)=abs(truth(bigger,1))./abs(estion(bigger,1));
-estdata(not(bigger))=abs(estion(not(bigger),1))./abs(truth(not(bigger),1));
-estdata=1-estdata;
-end
 
 function [estion,baseline,truth]=calcFocals(file,corr,n,noise)
 global debugg;

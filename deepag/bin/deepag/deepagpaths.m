@@ -11,3 +11,5 @@ addpath(fullfile(pwd ,'..','lib','scene_generator'));
 addpath(fullfile(pwd ,'..','lib','generated_solvers'));
 addpath(fullfile(pwd ,'machine_learning'));
 addpath(fullfile(pwd ,'prior'));
+addpath(fullfile(pwd ,'performance_experiments'));
+addpath(fullfile(pwd ,'low_level_geometry'));

@@ -3,7 +3,7 @@
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % CMP, 2017
 
-function [pol1,pol2,pol3,boug,truth]=macaulay_perf(file,corr,pop_size, method, noise)
+function [pol1,pol2,pol3,boug,truth]=focal_perf(file,corr,pop_size, method, noise)
 if nargin < 1
     file='../../data/paris/correspondences_F_synth_10K_1noise.mat';
     corr=7;
@@ -14,10 +14,10 @@ end
 
 [pol1,pol2,pol3,boug,truth]=calcFocals(file,corr,pop_size, method, noise);
 
-pol1=diffify(pol1,truth);
-pol2=diffify(pol2,truth);
-pol3=diffify(pol3,truth);
-boug=diffify(boug,truth);
+pol1=get_foc_error(pol1,truth);
+pol2=get_foc_error(pol2,truth);
+pol3=get_foc_error(pol3,truth);
+boug=get_foc_error(boug,truth);
 
 % histogram errors
 figure();
@@ -30,15 +30,6 @@ hold off
 legend('1','2','3','Bougnoux')
 
 %toc();
-end
-
-function estdata=diffify(estion,truth)
-%transform data to difference of f-Ratio and ground truth f-Ratio (errors)
-
-bigger=abs(estion(:,1))>abs(truth(:,1));
-estdata(bigger)=abs(truth(bigger,1))./abs(estion(bigger,1));
-estdata(not(bigger))=abs(estion(not(bigger),1))./abs(truth(not(bigger),1));
-estdata=1-estdata;
 end
 
 function [pol1,pol2,pol3,baseline,truth]=calcFocals(file,corr,n,method,noise)
