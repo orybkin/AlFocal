@@ -1,5 +1,3 @@
 # do not track folders with results
 results/
-bougnoux/
-bougnoux_variable_points/
-bougnoux_zuzana/
+bougnoux*

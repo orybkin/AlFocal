@@ -15,7 +15,7 @@
 %     two view reconstruction for the rays with the apical angle at X colsest to pi/3
 
 % pajdla@cmp.felk.cvut.cz, 2015-09-05
-function [X,v,z,e,a] = uu2X(u,P,method)
+function [X,v,z,e,a,transversal] = uu2X(u,P,method)
 if nargin>0
     if size(u,1)>4 % multiview largest angle
         X = zeros(3,size(u,2)); % 3D points
@@ -182,6 +182,7 @@ if nargin>0
                     if rank(A)>2
                         a = A\T;
                         X(:,i) = C1+a(1)*x1(:,i)+a(3)/2*n;
+                        transversal=norm(a(3)*n);
                     else
                         X(:,i) = inf(3,1);
                     end

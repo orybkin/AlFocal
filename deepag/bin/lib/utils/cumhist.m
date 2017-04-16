@@ -16,38 +16,38 @@
 %
 %       See also HIST, HIST2,  HISTO, IMHIST.
 
-%	Author: 	Tomas Pajdla, Tomas.Pajdla@esat.kuleuven.ac.be 
+%	Author: 	Tomas Pajdla, Tomas.Pajdla@esat.kuleuven.ac.be
 %			08/08/94 ESAT-MI2, KU Leuven
-%	Documentation:                 	 	  
+%	Documentation:
 %	Language: 	Matlab 4.1, (c) MathWorks
 %       Last change  : $Id: cumhist.m,v 1.1 2005/04/28 16:54:38 pajdla Exp $
-%       Status       : Ready ($Source: /home/cvs/Matlab/utils/cumhist.m,v $)  			 
+%       Status       : Ready ($Source: /home/cvs/Matlab/utils/cumhist.m,v $)
 %
 %
-function [N,X,cX,f]=cumhist(mat,hnum,mode)
- 
- if nargin < 3
-     mode = 0;
- end
+function [N,X,cX,f]=cumhist(mat,hnum,mode,~)
 
- if nargin < 2
-     hnum = max(20,length(mat)/20);
- end
- 
- f           = gcf;
- [N,X] 	     = hist(mat,hnum);
- cX          = cumsum(N);
- hold on
- if mode == 0
-     bar(X,N/max(N));
-     plot(X,cX/max(N),'-r');
- elseif mode==1
-     bar(X,N/cX(end));
-     plot(X,cX/cX(end),'-r');
- else
-     bar(X,N);
-     plot(X,cX,'-r');     
- end
- hold off
-  
+if nargin < 3
+    mode = 0;
+end
+
+if nargin < 2
+    hnum = max(20,length(mat)/20);
+end
+
+f           = gcf;
+[N,X] 	     = hist(mat,hnum);
+cX          = cumsum(N);
+hold on
+if mode == 0
+    %bar(X,N/max(N));
+    plot(X,cX/max(N));
+elseif mode==1
+   % bar(X,N/cX(end));
+    plot(X,cX/cX(end));
+else
+   % bar(X,N);
+    plot(X,cX);
+end
+hold off
+
 return

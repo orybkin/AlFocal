@@ -10,12 +10,13 @@ per_corr=1; % samples (with different noise) per correspondence set
 corrnum=20; % number of correspondences in simulation
 tic();
 trSize = 100*1000;
-valSize = 1*1000;
+valSize = 10*1000;
 train = 0; % whether the set should be training or validating
 saveFeatures=false;
 saveCorrs=true;
-minlen=200; diflen=2000; % focal len
+minlen=1000; diflen=0; % focal len
 noise=1; % noise in correspondences
+name=['synth_10K_' num2str(noise) 'noise'];
 
 if train
     Size=trSize;
@@ -40,7 +41,6 @@ for i=1:Size
         U(:,index) = [reshape(u{1}, [], 1); reshape(u{2}, [], 1)];        
     end
 end
-
 % saving
 if saveFeatures
     if train
@@ -53,7 +53,7 @@ if saveFeatures
         val_coefs=coefs;
         val_norm=norm_;
         val_f=f;
-        save('../../data/paris/features_F_nsynthrep_sample_1K.mat', 'val_coefs', 'val_norm', 'val_f', '-v7.3');
+        save(['../../data/paris/features_F_' name '.mat'], 'val_coefs', 'val_norm', 'val_f', '-v7.3');
         clear val_f val_coefs val_norm;
     end
 end
@@ -64,7 +64,7 @@ if saveCorrs
     corr_tr=form_corrstructure(f,U,norm_,ord(1:2));
     corr_val=form_corrstructure(f,U,norm_,ord(2:3));
     corr_tst=form_corrstructure(f,U,norm_,ord(3:4));
-    save('../../data/paris/correspondences_F_synth_1K.mat', 'corr_tr', 'corr_val', 'corr_tst', '-v7.3');
+    save(['../../data/paris/correspondences_F_' name '.mat'], 'corr_tr', 'corr_val', 'corr_tst', '-v7.3');
     clear corr_tr corr_val corr_tst;
 end
 
@@ -89,6 +89,8 @@ function [F,f1,f2,A, u]=getRandomF(minlen,diflen,noise,per_corr,corrnum)
 
 Fparam.f1 = minlen+diflen*rand(1,1);
 Fparam.f2 = minlen+diflen*rand(1,1);
+Fparam.f1=1500;
+Fparam.f2=2000;
 Fparam.per_corr=per_corr;
 Fparam.noise=noise;
 Fparam.corr=corrnum;

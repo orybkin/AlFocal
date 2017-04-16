@@ -13,7 +13,7 @@
 % npoints - number of 3D points
 % radius - size of the scene
 % ncams - number of cameras
-% minz - minimal distance from the scene
+% minz - minimal distance from the scenep
 % maxz - maximal distance from the scene
 % noutliers - number of ouliers in 0..1, 0.3 means 30%
 % anoise - noise amplitude - pixels in image coordinate system
@@ -634,11 +634,11 @@ function [P M m mnoiseless npoints] = GenerateScene(npoints, radius, ncams, minz
         anoise = anoise*ones(1,ncams);
     end
     
-    noiseModel = 2;
+    noiseModel = 5;
     
     %add 2D noise
     for j=1:ncams
-        
+        % the code is not used besides cases 2 and 5, beware, may not work
         switch noiseModel
             case 0
                 angle = 2*pi*rand(1, npoints);
@@ -649,6 +649,7 @@ function [P M m mnoiseless npoints] = GenerateScene(npoints, radius, ncams, minz
                 p = m{j} + (rand(2,npoints) - 0.5)*anoise;
                 
             case 2
+                % works
                 p = m{j} + (1/3*randn(2,npoints))*anoise(j);
                 
             case 3
@@ -658,6 +659,12 @@ function [P M m mnoiseless npoints] = GenerateScene(npoints, radius, ncams, minz
                 angle = 2*pi*rand(1, npoints);
                 amp = ( anoise(j)*randn(1, npoints) );
                 p = m{j} + [cos(angle); sin(angle)].*[amp;amp];
+            case 5
+                % hard-fixed amplitude, works
+                angle = 2*pi*rand(1, npoints);
+                amp = ( anoise(j) );
+                p = m{j} + amp*[cos(angle); sin(angle)];
+
         end
         m{j}=p;
     end

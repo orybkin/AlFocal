@@ -1,5 +1,7 @@
 % [F,A] = uu2F(u[,mth]) - Fundamental matrix computation
 %
+% WARNING - DEVELOPMENT CODE, FOR LIBRARY VERSION SEARCH ELSEWHERE
+%
 % u   = {u1 u2}, image matches u2'*F*u1 = 0
 % mth = method ({'HZ','Free'} implicit)
 %       mth{1} = normalization
@@ -14,11 +16,14 @@
 % A   = normalization transforms: F = A{2}'*Fn*A{1};  u{2}'*A{2}'*Fn*A{1}*u{1}->0 => Fn
 %
 % T. Pajdla, pajdla@cvut.cz, 2016-09-11
-function [F,A,focal] = uu2F(u,mth,testset)
+function [F,A,f] = uu2F(u,mth,testset,cells)
 if nargin<3
     testset={NaN};
 end
 global original_solver;
+if nargin<4
+    cells=false; % determines whether in Prop6 we return cell array or just array
+end
 original_solver=false;
 focal={NaN};
 if nargin>0
@@ -48,9 +53,9 @@ if nargin>0
     switch mth{2}
         case 'Prop6'
             n=size(x{1},2);
-            per=perms(1:n);
+            per=nchoosek(1:min(n,8),6);
             f=cell(1,n);
-            for j=1:n
+            for j=1:size(per,1)
                 x_t = {x{1}(:,per(j,:)) x{2}(:,per(j,:))};
                 B = zeros(size(x_t{1},2),9);
                 % B * f = 0
@@ -68,6 +73,7 @@ if nargin>0
             % f is the null space of B
             [~,~,f] = svd(B,0);
     end
+    %calculate
     switch mth{2}
         case 'Free'
             if size(B,1)<8
@@ -112,14 +118,22 @@ if nargin>0
             prop=getFProp(u,testset);           
             [F,focal]=propdet2F(f,prop);
         case 'Prop6'
-            % same as above, but using averaging over different subsets'
-            % solutions
+            % same as above, but computes all different 6-subsets solutions
             
             %f1/f2 estimated by calling uu2F
             prop=getFProp(u,testset);
-            F=cell(1,n);
+            if cells
+                F=cell(1,n);
+            else                
+                F=[];
+            end
             for i=1:n
-                [F{i},focal{i}]=propdet2F(f{i},prop);
+                if cells
+                    [F{i},focal{i}]=propdet2F(f{i},prop);
+                else
+                    [Ft,~]=propdet2F(f{i},prop);
+                    F=cat(3,F,Ft);
+                end
             end
         otherwise
             error([mth{2} ' not implemented']);
@@ -127,9 +141,15 @@ if nargin>0
     % denormalize: u2'*Fa*u1 = u2'*A2'*F*A1*u1 => Fa = A2'*F*A
     switch mth{2}
         case 'Prop6'
+            if cells
             for j=1:size(F,2)
                 for i=1:size(F{j},3)
                     F{j}(:,:,i) = A{2}'*F{j}(:,:,i)*A{1};
+                end
+            end
+            else
+                for i=1:size(F,3)
+                    F(:,:,i) = A{2}'*F(:,:,i)*A{1};
                 end
             end
         otherwise
@@ -206,17 +226,22 @@ end
 end
 
 function  prop=getFProp(u,testset)
-if size(u,2)>7
+global debugg;
+% find proportion with the uu2F function.
+if size(u{1},2)>7
     Fund=F_features(u{1}, u{2}, 'Free', testset);
 else
     Fund=F_features(u{1}, u{2}, '|F|=0', testset);
 end
-focal=F2f1f2(Fund);
+focal=F2f1f2(reshape(Fund,3,3));
 prop=abs(focal(2))/abs(focal(1));
-%prop=1.33;
+if debugg
+    focal
+end
 end
 
 function [F,focal]=propdet2F(f,prop)
+% use proportion and 3 least components of 'f' to find possible Fs.
 global original_solver;
 N{1} = reshape(f(:,end-2),3,3)';
 N{2} = reshape(f(:,end-1),3,3)';

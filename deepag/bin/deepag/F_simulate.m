@@ -14,12 +14,34 @@
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % INRIA, 2016
 
-function [ F,A,u ] = F_simulate( Fparam, method )
+function [F,A,u,P] = F_simulate( Fparam, method )
 old_version=false;
 %% Initialize
 global ps;
 ps.plot    = true;
-if old_version && false
+if ~old_version
+    %% using scene generator from Zuzana.
+    % beware, hacky rescaling. 
+    sceneType = {'randombox' 'random'};
+    pixel = 1/1000; %rescaling to pixels. in the output of GenerateScene the image will be always between -1 and 1, they say, so 2000 pixels
+    noise = Fparam.noise*pixel;
+    f1=Fparam.f1*pixel;
+    f2=Fparam.f2*pixel;
+    fmax=max(f1,f2);
+    Npoints = Fparam.corr;
+    Ncams = 2;
+    Kgt1 = diag([f1 f1 1]);
+    Kgt2 = diag([f2 f2 1]);
+    gtk1 = 0;
+    gtk2 = 0;
+    [P, ~, m, ~] = GenerateScene(Npoints, [10*fmax 10*fmax], Ncams, 20*fmax, 30*fmax, 0, noise, [Kgt1;Kgt2], sceneType, [], [], [gtk1,gtk2], true);
+    sample=randperm(size(m{1},2),Fparam.corr);
+    u={m{1}(:,sample)/pixel m{2}(:,sample)/pixel}; %rescaling back
+    testsample=setdiff(1:Npoints,sample); %mini RANSAC is running inside F_features
+    testset={m{1}(:,testsample)/pixel m{2}(:,testsample)/pixel};
+    [F{1},A{1}]=F_features(u{1}, u{2},method,testset);
+    u={u{1}*A{1}{1}(1) u{2}*A{1}{2}(1)}; %rescaling forth. u is now in the same scale as F, but f isn't.
+else
    %% OLD VERSION, MAY NOT WORK
     %tic();
     % focal lengths
@@ -53,25 +75,6 @@ if old_version && false
         F{1}=reshape(F{1},9,1);
         F{1} = F{1}/norm(F{1});  [~,mi] = max(abs(F{1})); F{1} = F{1}*sign(F{1}(mi));
     end
-else
-    %% using scene generator from Zuzana.
-    % beware, hacky rescaling. 
-    sceneType = {'randombox' 'random'};
-    pixel = 1/1000; %rescaling to pixels. in the output of GenerateScene the image will be always between -1 and 1, they say, so 2000 pixels
-    noise = Fparam.noise*pixel;
-    f1=Fparam.f1*pixel;
-    f2=Fparam.f2*pixel;
-    Npoints = 100;
-    Ncams = 2;
-    Kgt1 = diag([f1 f1 1]);
-    Kgt2 = diag([f2 f2 1]);
-    gtk1 = 0;
-    gtk2 = 0;
-    [~, ~, m, ~] = GenerateScene(Npoints, [4000*pixel 4000*pixel], Ncams, 5000*pixel, 8000*pixel, 0, noise, [Kgt1;Kgt2], sceneType, [], [], [gtk1,gtk2], true);
-    sample=randperm(size(m{1},2),Fparam.corr);
-    u={m{1}(:,sample)/pixel m{2}(:,sample)/pixel}; %rescaling back
-    [F{1},A{1}]=F_features(u{1}, u{2});
-    u={u{1}*A{1}{1}(1) u{2}*A{1}{2}(1)}; %rescaling forth. u is now in the same scale as F, but f isn't.
 end
 end
 

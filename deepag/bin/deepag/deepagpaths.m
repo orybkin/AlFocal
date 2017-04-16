@@ -9,3 +9,5 @@ addpath(fullfile(pwd ,'..','lib','matconvnet/matlab'));
 addpath(fullfile(pwd ,'..','lib','APT'));
 addpath(fullfile(pwd ,'..','lib','scene_generator'));
 addpath(fullfile(pwd ,'..','lib','generated_solvers'));
+addpath(fullfile(pwd ,'machine_learning'));
+addpath(fullfile(pwd ,'prior'));
