@@ -80,20 +80,21 @@ else % unit tests
     fg = [1500 900];
     K1 = [fg(1)  0     p{1}(1)
         0      fg(1) p{1}(2)
-        0      0     1];
+        0      0     1]
     K2 = [fg(2) 0     p{2}(1)
         0     fg(2) p{2}(2)
-        0     0     1];
+        0     0     1]
     % Rotations
-    R1 = eye(3);
-    R2 = a2r(rand(3,1),pi/5);
+    R1 = eye(3)
+    R2 = a2r([1;0;0],pi/6)
     % Projection matrices
-    P1 = K1*R1*[eye(3)       [-1000;0;0]];
-    P2 = K2*R2*[eye(3)  1000*[rand(2,1);0]];
-    F = (PP2F(P1,P2));
+    P1 = K1*R1*[eye(3)  [-1;0;0]]
+    P2 = K2*R2*[eye(3)   [1;0;0]]
+    F = (PP2F(P1,P2))
     f_ratio=F2ratio(F,p,'Bougnoux')
-    f_ratio=F2ratio(F,p)
+    f_ratio=F2ratio(F,p,'Polynomial3')
     f_ratio=F2ratio(F,p)
     fg(2)/fg(1)
     f_ratio = all(abs(f_ratio-fg(2)/fg(1))<1e-8);
+    f_ratio=F
 end

@@ -3,20 +3,20 @@
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % CMP, 2017
 
-function [best,estion,support, baseline,truth]=fratio_perf(file,corr,pop_size, method, noise)
+function [best,estion,support, baseline,truth]=ratio6_perf(file,corr,pop_size, method, noise_out)
 if nargin < 1
     file='../../data/paris/correspondences_F_synth_1K_1noise.mat';
     corr=7;
     pop_size=100;
     method='Prop6';
-    noise=0;
+    noise_out=10;
 end
 
-[best, estion,support,baseline,truth]=calcFocals(file,corr,pop_size, method, noise);
+[best, estion,support,baseline,truth]=calcFocals(file,corr,pop_size, method, noise_out);
 
-basedata=get_foc_err(baseline,truth);
-estdata=get_foc_err(estion,truth);
-bestdata=get_foc_err(best,truth);
+basedata=get_foc_error(baseline,truth);
+estdata=get_foc_error(estion,truth);
+bestdata=get_foc_error(best,truth);
 
 % histogram errors
 figure();

@@ -1,28 +1,29 @@
-% The script histograms 6-Ratio results versus baseline
-%
+% The script histograms 
+
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % CMP, 2017
 
-function [pol1,pol,boug,truth]=fratio_perf(file,corr,pop_size, noise)
+function [pol1,pol,boug,truth]=fratio_perf(file,corr,pop_size, noise_out)
 if nargin < 1
-    file='../../data/paris/correspondences_F_synth_10K_1noise.mat';
+    noise=1
+    file=['../../data/paris/correspondences_F_synth_1K_' num2str(noise) 'noise.mat'];
     corr=7;
-    pop_size=10000;
-    noise=0;
+    pop_size=100;
+    noise_out=0;
 end
 
-[pol1,pol,boug,truth]=calcFocals(file,corr,pop_size, noise);
+[pol1,pol,boug,truth]=calcFocals(file,corr,pop_size, noise_out);
 
-pol1=get_rat_error_add(pol1,truth);
-pol=get_rat_error_add(pol,truth);
-boug=get_rat_error_add(boug,truth);
+pol1_e=get_rat_error_add(pol1,truth);
+pol_e=get_rat_error_add(pol,truth);
+boug_e=get_rat_error_add(boug,truth);
 
 % histogram errors
 figure();
-cumhist(sort(pol1),20,1);
+cumhist(sort(pol1_e),20,1);
 hold on
-cumhist(sort(pol),20,1);
-cumhist(sort(boug),20,1);
+cumhist(sort(pol_e),20,1);
+cumhist(sort(boug_e),20,1);
 hold off
 legend('f1/f2','direct','Bougnoux')
 

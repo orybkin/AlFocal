@@ -62,7 +62,8 @@ if nargin>0
             'URGENT: Look at the F2f1f2 function'
     end
 else % unit tests
-    p = {[500;600] [500;400]};
+    %p = {[500;600] [500;400]};
+    p = {[0;0] [0;0]};
     fg = [1100 900];
     K1 = [fg(1)  0     p{1}(1)
         0      fg(1) p{1}(2)
@@ -74,9 +75,8 @@ else % unit tests
     R1 = eye(3);
     R2 = a2r(rand(3,1),pi/10);
     % Projection matrices
-    P1 = K1*R1*[eye(3)       [-1000;0;0]];
-    P2 = K2*R2*[eye(3)  1000*[rand(2,1);0]];
+    P1 = K1*R1*[eye(3)       [-1;0;0]];
+    P2 = K2*R2*[eye(3)  [rand(2,1);0]];
     F = PP2F(P1,P2);
-    f = F2f1f2(F,p);
     f = all(abs(f-fg)<1e-8);
 end

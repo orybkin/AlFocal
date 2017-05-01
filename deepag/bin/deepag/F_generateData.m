@@ -10,13 +10,13 @@ per_corr=1; % samples (with different noise) per correspondence set
 corrnum=20; % number of correspondences in simulation
 tic();
 trSize = 100*1000;
-valSize = 10*1000;
+valSize = 1*1000;
 train = 0; % whether the set should be training or validating
 saveFeatures=false;
 saveCorrs=true;
 minlen=1000; diflen=0; % focal len
-noise=1; % noise in correspondences
-name=['synth_10K_' num2str(noise) 'noise'];
+noise=0; % noise in correspondences
+name=['synth_' num2str(valSize/1000) 'K_' num2str(noise) 'noise'];
 
 if train
     Size=trSize;

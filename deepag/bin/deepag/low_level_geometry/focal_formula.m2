@@ -61,10 +61,11 @@ fl1=1500
 fl2=2000
 K1 = matrix{{fl1,0,0},{0,fl1,0},{0,0,1}}
 K2 = matrix{{fl2,0,0},{0,fl2,0},{0,0,1}}
-R2 = matrix{{0,1,0},{-3/5,0,4/5},{4/5,0,3/5}} * matrix{{1,0,0},{0,3/5,-4/5},{0,4/5,3/5}} ** R
+R2 = matrix{{0,1,0},{-3/5,0,4/5},{4/5,0,3/5}} * matrix{{1,0,0},{0,3/5,-4/5},{0,4/5,3/5}}
+
 R1 = id_(R^3)
 points=7
-X  = matrix(fillMatrix(mutableMatrix(QQ,4,points)))
+X  = matrix(fillMatrix(mutableMatrix(CC,4,points)))
 X =  mutableMatrix for i from 0 to points-1 list (1/X_i_3)*(X_i)
 for i from 0 to points-1 do X_(2,i)=X_(2,i)+3
 X = matrix X

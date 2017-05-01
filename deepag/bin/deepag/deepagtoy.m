@@ -11,6 +11,7 @@ deepagpaths;
 sceneType = {'randombox' 'random'};
 pixel = 1/1000;
 noise = 1*pixel;  noise=0;
+noise_out=0;
 Npoints = 20;
 Ncams = 2;
 samplesize = 7;
@@ -29,7 +30,7 @@ testsample=setdiff(1:Npoints,sample);
 u={m{1}(:,sample)/pixel m{2}(:,sample)/pixel};
 testset={m{1}(:,testsample)/pixel m{2}(:,testsample)/pixel};
 u1=u{1}(:,1);
-u{1}(:,1)=u{1}(:,1)+10*randn(2,1);
+u{1}(:,1)=u{1}(:,1)+noise_out*randn(2,1);
 %% calculating
 % 7pt
 clear estion3 estion estion6;
