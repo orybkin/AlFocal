@@ -5,7 +5,7 @@
 
 function [pol1,pol,boug,truth]=fratio_perf(file,corr,pop_size, noise_out)
 if nargin < 1
-    noise=1
+    noise=1;
     file=['../../data/paris/correspondences_F_synth_1K_' num2str(noise) 'noise.mat'];
     corr=7;
     pop_size=100;

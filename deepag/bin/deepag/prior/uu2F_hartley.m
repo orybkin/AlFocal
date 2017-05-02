@@ -21,7 +21,7 @@ wd=1;
 %init described in the paper as "Calibrated reconstruction"
 F_init=uu2F({u_hartley,v_hartley},{'None' '|F|=0'});
 F_init=F;
-F=correctF(F_init,f_prior,p_prior);
+F=correct_F(F_init,f_prior,p_prior);
 newF=reshape(F,1,9);
 p=p_prior;
 f=f_prior;
@@ -70,17 +70,4 @@ end
 end
 
 
-function F=correctF(F,f,p)
-% Corrects F to be consistent with f and p, and still be a fundamental
-% matrix. Described in the paper
-K1=diag([f(1) f(1) 1]);
-K2=diag([f(2) f(2) 1]);
-K1(1:2,3)=p(1:2);
-K2(1:2,3)=p(3:4);
-
-E=K2'*F*K1;
-[U,D,V]=svd(E);
-E=U*diag([1 1 0])*V'; % an interesting point is that this step is not required. maybe try to leave it out and test converge
-F=inv(K2')*E*inv(K1);
-end
 

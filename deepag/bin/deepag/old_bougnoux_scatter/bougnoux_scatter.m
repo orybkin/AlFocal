@@ -36,10 +36,10 @@ else
 end
 
 %plot
-scatter(abs(focals(choice,1)),abs(focals(choice,2)),'b+','DisplayName','real answer');
+scatter(abs(focals(choice,1)),abs(focals(choice,2)),'b+','DisplayName','real focal');
 hold on
 if any(unchoice==1)
-    scatter(abs(focals(unchoice,1)),abs(focals(unchoice,2)),'r+','DisplayName','abs(imaginary answer)');
+    scatter(abs(focals(unchoice,1)),abs(focals(unchoice,2)),'r+','DisplayName','abs(imaginary focal)');
 end
 scatter(900,1100,40,'go','DisplayName','ground truth');
 plot([0 3600],[0 4400],'y','DisplayName','correct proportion line');

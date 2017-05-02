@@ -54,11 +54,14 @@ stat_data(:,4)=[getstd(propReal) getstd(propImg)];
 %toc();
 %plot
 if plotting
-    s1=scatter(prop_errs(real_idx,1),prop_errs(real_idx,2),'b+','DisplayName','real answer');
+    scatter(abs(estion(real_idx,1)),abs(estion(real_idx,2)),'b+','DisplayName','real focal');
+    hold on
     if any(img_idx==1)
-        hold on
-        s2=scatter(prop_errs(img_idx,1),prop_errs(img_idx,2),'r+','DisplayName','abs(imaginary answer)');
+        scatter(abs(estion(img_idx,1)),abs(estion(img_idx,2)),'r+','DisplayName','abs(imaginary focal)');
     end
+    scatter(1500,2000,40,'go','DisplayName','ground truth');
+    plot([0 3000],[0 4000],'y','DisplayName','correct proportion line');
+    axis([0 4000 0 4000]);
     %triffles
     [~,~]=legend('-DynamicLegend'); % don't change this line - it fixes a Matlab bug
     title({['Bougnoux formula estimation from ' int2str(corr) ' correspondences.  method = ' method], ...
@@ -66,16 +69,10 @@ if plotting
     xlabel('abs(f2)');
     ylabel('abs(f1)');
     method=strrep(method,'|','');
-    name=['bougnoux/bougnoux_corr=' int2str(corr) '_' method];
-    %save
-    set(gcf, 'PaperUnits', 'points');
-    set(gcf, 'PaperPosition', [0 0 1024 800]);
-    axis equal;
-    axis([0 5 0 5]);
+    name=['bougnoux/scatter/bougnoux_corr=' int2str(corr) '_' method];
     saveas(gcf,[name  '.fig']);
     saveas(gcf,[name '.jpg']);
     hold off
-hold off
 end
 %toc();
 end
@@ -127,7 +124,7 @@ for i=1:n
         debugg=0;
     end
         
-    [Fund,A]=F_features(u1,u2,method,testset,3,true);
+    [Fund,A]=F_features(u1,u2,method,testset,3,false);
     %method
     %little_ransac(reshape(Fund,3,3),A,testset,3,false);
     estion(i,:)=F2f1f2(reshape(Fund,3,3));

@@ -34,12 +34,7 @@ if nargin>0
             p2 = a2h(p{2});
             f(1) = sqrt((-p2'*xx(e2)*II*F *(p1*p1')*F'*p2)/(p2'*xx(e2)*II*F *II*F'*p2));
             f(2) = sqrt((-p1'*xx(e1)*II*F'*(p2*p2')*F *p1)/(p1'*xx(e1)*II*F'*II*F *p1));
-            if any(~isreal(f)) && false
-                [(-p1'*xx(e1)*II*F'*(p2*p2')*F *p1) (p1'*xx(e1)*II*F'*II*F *p1)]
-                [(-p2'*xx(e2)*II*F *(p1*p1')*F'*p2) (p2'*xx(e2)*II*F *II*F'*p2)]
-                1;
-            end
-            % formulae from Macaulay - see documentation (unfortunately it does not exist)
+        % formulae from Macaulay - see the pdf thesis 
         case 'Polynomial1'
             f(1)=-F(3,3)*(F(1,2)*F(1,3)*F(3,3)-F(1,3)^2*F(3,2)+F(2,2)*F(2,3)*F(3,3)-F(2,3)^2*F(3,2))/(F(1,1)*F(1,2)*F(3,1)*F(3,3)-F(1,1)*F(1,3)*F(3,1)*F(3,2)+F(1,2)^2*F(3,2)*F(3,3)-F(1,2)*F(1,3)*F(3,2)^2+F(2,1)*F(2,2)*F(3,1)*F(3,3)-F(2,1)*F(2,3)*F(3,1)*F(3,2)+F(2,2)^2*F(3,2)*F(3,3)-F(2,2)*F(2,3)*F(3,2)^2);
             f(2)=-F(3,3)*(F(2,1)*F(3,1)*F(3,3)+F(2,2)*F(3,2)*F(3,3)-F(2,3)*F(3,1)^2-F(2,3)*F(3,2)^2)/(F(1,1)*F(1,3)*F(2,1)*F(3,3)-F(1,1)*F(1,3)*F(2,3)*F(3,1)+F(1,2)*F(1,3)*F(2,2)*F(3,3)-F(1,2)*F(1,3)*F(2,3)*F(3,2)+F(2,1)^2*F(2,3)*F(3,3)-F(2,1)*F(2,3)^2*F(3,1)+F(2,2)^2*F(2,3)*F(3,3)-F(2,2)*F(2,3)^2*F(3,2));

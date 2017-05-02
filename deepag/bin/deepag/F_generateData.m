@@ -15,7 +15,7 @@ train = 0; % whether the set should be training or validating
 saveFeatures=false;
 saveCorrs=true;
 minlen=1000; diflen=0; % focal len
-noise=0; % noise in correspondences
+noise=0.5; % noise in correspondences
 name=['synth_' num2str(valSize/1000) 'K_' num2str(noise) 'noise'];
 
 if train
@@ -47,13 +47,13 @@ if saveFeatures
         tr_coefs=coefs;
         tr_norm=norm_;
         tr_f=f;
-        save('../../data/paris/features_F_synth.mat', 'tr_coefs', 'tr_norm', 'tr_f', '-v7.3');
+        save('../../data/features_F_synth.mat', 'tr_coefs', 'tr_norm', 'tr_f', '-v7.3');
         clear tr_f tr_coefs tr_norm;
     else
         val_coefs=coefs;
         val_norm=norm_;
         val_f=f;
-        save(['../../data/paris/features_F_' name '.mat'], 'val_coefs', 'val_norm', 'val_f', '-v7.3');
+        save(['../../data/features_F_' name '.mat'], 'val_coefs', 'val_norm', 'val_f', '-v7.3');
         clear val_f val_coefs val_norm;
     end
 end
@@ -64,7 +64,7 @@ if saveCorrs
     corr_tr=form_corrstructure(f,U,norm_,ord(1:2));
     corr_val=form_corrstructure(f,U,norm_,ord(2:3));
     corr_tst=form_corrstructure(f,U,norm_,ord(3:4));
-    save(['../../data/paris/correspondences_F_' name '.mat'], 'corr_tr', 'corr_val', 'corr_tst', '-v7.3');
+    save(['../../data/correspondences_F_' name '.mat'], 'corr_tr', 'corr_val', 'corr_tst', '-v7.3');
     clear corr_tr corr_val corr_tst;
 end
 

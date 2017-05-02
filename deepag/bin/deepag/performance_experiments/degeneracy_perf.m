@@ -42,12 +42,14 @@ for j=1:noises
 end
 if parallel_axes
     legend(arrayfun(@(x) {[num2str(x) char(176)]},param))
+    saveas(gcf, ['../../../results/foc_err_parallel_axes.png']);
 else
     legend(arrayfun(@(x) {[num2str(x) ' cm']},param))
+    saveas(gcf, ['../../../results/foc_err_intersecting_axes.png']);
 end
 %suptitle('errors in focal length w.r.t. axes distance')
 
-% plot ratio errors
+% plot mult ratio errors
 figure();
 for j=1:noises
     subplot(N,M,j);
@@ -61,7 +63,7 @@ end
 legend(arrayfun(@(x) {num2str(x)},param))
 suptitle('multiplicative errors in ratio w.r.t. axes distance')
 
-% plot ratio errors
+% plot add ratio errors
 figure();
 for j=1:noises
     subplot(N,M,j);

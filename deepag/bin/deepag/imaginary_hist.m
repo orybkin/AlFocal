@@ -52,9 +52,9 @@ figure();
 [counts2]=hist(transversal(not(real)),centers1);
 plot(counts1./counts2);
 xlabel('freq_{real}/freq_{imag}');
-figure()
 end 
 
+fig=figure();
 % histogram errors in f-Ratio for imaginary and real results separately
 error_ratio=ratio-gt_ratio;
 h1=histogram(error_ratio(real),[-1:0.05:1.5]);
@@ -62,11 +62,12 @@ h1.FaceColor='b';
 hold on
 h2=histogram(error_ratio(not(real)),[-1:0.05:1.5]);
 h2.FaceColor='r';
-legend({'good','bad'})
+legend({'real f','imaginary f'})
 xlabel('error in ratio');
 ylabel('frequency');
 title(['error for ' num2str(noise) ' pixel noise']);
-saveas(gcf, ['results/error_hist_' num2str(noise) 'noise']);
+saveas(fig, ['../../../results/error_hist_' num2str(noise) 'noise']);
+saveas(fig, ['../../../results/imaginary_hist.png']);
 end
 
 function [truth,estion,transversal]=calcFocals(noise,corr,n,method,noise_out)
@@ -99,7 +100,7 @@ for i=1:n
     u1(:,1)=u1(:,1)+noisy(:,i);
     
     % find optical axes' transversal length
-    [~,~,~,~,~,transversal(i)] = uu2X([u1;u2],[P{1}; P{2}],'TRAN');
+    [~,~,~,~,~,transversal(i)] = uu2X1([u1;u2],[P{1}; P{2}],'TRAN');
     
     %calculate focal length estimation
     [Fund,A,support(i)]=F_features(u1,u2,method,testset,3,false);

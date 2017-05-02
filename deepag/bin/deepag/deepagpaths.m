@@ -14,4 +14,5 @@ addpath(fullfile(pwd ,'..','lib','frecexample'));
 addpath(fullfile(pwd ,'machine_learning'));
 addpath(fullfile(pwd ,'prior'));
 addpath(fullfile(pwd ,'performance_experiments'));
+addpath(fullfile(pwd ,'utils'));
 addpath(fullfile(pwd ,'low_level_geometry'));

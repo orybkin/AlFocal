@@ -236,7 +236,7 @@ end
 focal=F2f1f2(reshape(Fund,3,3));
 prop=abs(focal(2))/abs(focal(1));
 if debugg
-    focal
+    focal;
 end
 end
 
