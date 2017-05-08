@@ -1,14 +1,14 @@
-function [err,J]=sampson(F,u,v)
+function [err,J]=sampson(F,u1,u2)
 % calculates the sampson error
 
-if size(u,1)<3
-    u=[u; ones(1,size(u,2))];
-    v=[v; ones(1,size(u,2))];
+if size(u2,1)<3
+    u2=[u2; ones(1,size(u2,2))];
+    u1=[u1; ones(1,size(u2,2))];
 end
 F=reshape(F,3,3);
-F1=F*v;
-F2=F'*u;
-num=sum(u.*F1);
+F1=F*u1;
+F2=F'*u2;
+num=sum(u2.*F1);
 den=sqrt((F1(1,:).^2)+(F1(2,:).^2)+(F2(1,:).^2)+(F2(2,:).^2));
 err=(num./den);
 if nargout>1
@@ -23,10 +23,10 @@ if nargout>1
     % beware, hacky permutations
     den=permute(den, [1 3 2]);
     num=permute(num, [1 3 2]);
-    u=permute(u,[1 3 2]);
-    v=permute(v,[3 1 2]);
-    dden = (permute(F1,[1 3 2]).*v + u.*permute(F2, [1 3 2]))./den;
-    d=(u.*v.*den - num.*dden)./den.^2;
+    u2=permute(u2,[1 3 2]);
+    u1=permute(u1,[3 1 2]);
+    dden = (permute(F1,[1 3 2]).*u1 + u2.*permute(F2, [1 3 2]))./den;
+    d=(u2.*u1.*den - num.*dden)./den.^2;
     J=reshape(d,9,[])';
 end
 end

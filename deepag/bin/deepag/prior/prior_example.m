@@ -1,18 +1,16 @@
 % comparison of Hartley v. Zuzana prior methods - an example 
 %
 
-%% Initialize
-deepagpaths;
 
 %% generating
 sceneType = {'randombox' 'random'};
 pixel = 1/1000;
-noise = 1*pixel;  noise=0;
+noise = 1*pixel;  noise=1;
 Npoints = 20;
 Ncams = 2;
 samplesize = 7;
-f1 = 1500*pixel;
-f2 = 2000*pixel;
+f1 = 3000*pixel;
+f2 = 4000*pixel;
 p1= [20*pixel 10*pixel];
 p2= [20*pixel 10*pixel];
 fmax=max(f1,f2);
@@ -32,11 +30,11 @@ testset={m{1}(:,testsample) m{2}(:,testsample)};
 %% calculating
 % 7pt
 clear estion3 estion estion6;
-[F,A]=F_features(u{1},u{2},'|F|=0',testset);
+[F,A]=F_features(u{1},u{2},'|F|=0',testset,0.001);
 F_t = inv(A{2})'*reshape(F,3,3)*inv(A{1});
 f_7pt=F2f1f2(F_t)*diag([1/A{1}(1) 1/A{2}(1)]);
-
-norm(f_7pt-[f1; f2])
+f_7pt
+norm(abs(f_7pt)-[f1 f2])
 %% calculating
 % Zuzana
 f1prior =f1+ 1.5*rand(1);
@@ -54,8 +52,14 @@ tic()
 [f1_zuz, u1o, v1o, f2_zuz, u2o, v2o, l1, l2, err, iter] = f1_f2_from_F(F_t, f1prior, u1prior, v1prior,f2prior, u2prior, v2prior, w1, w2, w3, w4);
 toc()
 norm([f1_zuz f2_zuz]-[f1 f2])
+
 %% Hartley
 tic()
-[F, p_hartley, f_hartley] = uu2F_hartley(F_t,u{1},u{2},[f1prior; f2prior],{[u1prior; v1prior] [u1prior; v1prior]});
+[F, p_hartley, f_hartley, output] = uu2F_hartley(F_t,u{1},u{2},[f1prior; f2prior],{[u1prior; v1prior] [u1prior; v1prior]});
 toc()
+output.iterations
 norm(f_hartley-[f1 f2])
+%%
+norm([f1 f2]-[f1prior f2prior])
+
+

@@ -1,8 +1,11 @@
-function F=correctF(F,f,p)
+function [F,K1,K2]=correctF(F,f,p)
 % Corrects F to be consistent with f and p, and still be a fundamental
 % matrix. Described in the paper
 if nargin<3
     p = {[0;0] [0;0]};
+end
+if iscell(p)
+    p=[p{1}; p{2}];
 end
 K1=diag([f(1) f(1) 1]);
 K2=diag([f(2) f(2) 1]);

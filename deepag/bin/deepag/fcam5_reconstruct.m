@@ -1,42 +1,9 @@
 % Reconstruction 4 focal length computation
 %
 % Simulation
-clear all
-% Scene
-X = [0 1 1 0 0 1 2 0 1 2
-     0 0 1 1 0 0 1 1 1 2
-     0 0 0 0 1 2 1 2 1 2];
-X = X + 0.1*randn(size(X));
-X = [X 2*rand(3,40)+[0;0;0]*ones(1,40)];
-% Cameras
-% 1
-f0{1} = 1000;
-K{1} = [f0{1} 0 500;0 f0{1} 500;0 0 1];
-R{1} = a2r([1;10;0],20/180*pi);
-C{1} = 3*[2;1;-2];
-% 2
-f0{2} = 2000;
-K{2} = [f0{2} 0 500;0 f0{2} 500;0 0 1];     
-R{2} = a2r([7;10;2],-20/180*pi);
-C{2} = 3*[-1;1;-2];
-% 3
-f0{3} = 3000;
-K{3} = [f0{3} 0 500;0 f0{3} 500;0 0 1];     
-R{3} = a2r([10;5;1],30/180*pi);
-C{3} = 3*[1;-1;-2];
-if true   
-    % 4
-    f0{4} = 4000;
-    K{4} = [f0{4} 0 500;0 f0{4} 500;0 0 1];
-    R{4} = a2r([10;-10;1],-10/180*pi);
-    C{4} = 5*[0.5;0.5;-2];
-    % 5
-    f0{5} = 2000;
-    K{5} = [f0{5} 0 500;0 f0{5} 500;0 0 1];
-    R{5} = a2r([-3;45;-3],-75/180*pi);
-    C{5} = 3*[-2;0;0];
-end
 % Projections
+function err=fcam5_reconstruct(K,R,C,X)
+
 P = cellfunuo(@(K,R,C) KRC2P(K,R,C),K,R,C);
 u = cellfunuo(@(P) X2u(X,P)+ 0.5*randn(2,size(X,2)),P);
 % Fundamental matrix
@@ -52,7 +19,7 @@ for i=1:numel(u)
         F{i,j} = F{i,j}(:,:,ix);
     end
 end
-% get focal lengths, cameras, reconstruct and select
+% get focal lengths, cameras, reconstruct and select chirality
 PR = {}; Pr = {}; XR = {}; Xr = {}; v = {}; z = {}; e = {}; a = {};
 for i=1:numel(u)
     for j=i+1:numel(u)
@@ -85,7 +52,6 @@ for i=1:numel(u)
     end
 end
 % evaluate the initial recosntruction
-f3 = subfig(3,4,3); hold;
 for i=1:numel(u)
     for j=i+1:numel(u)
         % reproject reconstructed points
@@ -125,7 +91,7 @@ ix = arrayfun(@(i) argmin(abs(mfe(i)-fe{i})),1:length(mfe)); % best cameras indi
 ci = cell2mat(arrayfun(@(i) fei{i}(:,ix(i)),1:length(ix),'UniformOutput',false)); % best camera pairs 
 [ic,jc] = find(ci==ones(size(ci,1),1)*(1:size(ci,2))); % ic is the camera to be is the camera to be used for camera cj in the pair c(:,cj)
 Ps = arrayfun(@(i) PR{ci(1,i),ci(2,i)}{ic(i)},1:size(ci,2),'UniformOutput',false); % select cameras
-% Initialize points to their geoetric median
+% Initialize points to their geometric median
 XX = XR(~cellfun(@isempty,XR)); % all points
 nX = size(XX{1},2); % the number of reconstructions 
 XX = reshape(cell2mat(XX'),3,nX,[]); % 3D points in a 3D matrix XX(coordinates,points,recontructions)
@@ -150,10 +116,10 @@ opBA.verbose = 0; % info printout on
 opBA.constant_cameras = 0; % first camera fixed
 opBA.constant_points = 0; % no fixed cameras
 % do BA
-('hell no')
 [ub,Pb,Xb,eb] = uPXBA(u,Ps,Xs,opBA);
-('hell yeah')
 % error on points
 Eb = XY2rts([Xb;X]);
 eXb = XY2rtsErr(Eb,[Xb;X]);
+err=eXb;
 
+end

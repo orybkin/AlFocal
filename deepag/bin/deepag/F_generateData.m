@@ -15,7 +15,7 @@ train = 0; % whether the set should be training or validating
 saveFeatures=false;
 saveCorrs=true;
 minlen=1000; diflen=0; % focal len
-noise=0.5; % noise in correspondences
+noise=0; % noise in correspondences
 name=['synth_' num2str(valSize/1000) 'K_' num2str(noise) 'noise'];
 
 if train

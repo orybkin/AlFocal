@@ -5,7 +5,8 @@
 
 function [pol1,pol2,pol3,boug,truth]=focal_perf(file,corr,pop_size, method, noise)
 if nargin < 1
-    file='../../data/paris/correspondences_F_synth_10K_1noise.mat';
+    noise=1;
+    file=['../../data/correspondences_F_synth_1K_' num2str(noise) 'noise.mat'];
     corr=7;
     pop_size=10000;
     method='Prop6';

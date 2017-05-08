@@ -1,7 +1,5 @@
-function [F support] = little_ransac(F,A,testset,threshold,verbose)
-% my little_ransac is a small stupid and at the very best partial 
-% implementation of this great manifestation of the Monte Carlo 
-% methods' genius, RANSAC method.
+function [F support] = voteF(F,A,testset,threshold,verbose)
+% support method for chosing F
 
 % choose best F using testset data. A is the scaling, but it is not used.
 % what a missed opportunity
@@ -42,10 +40,15 @@ for i=1:testsize
         end
     end
 end
+unique(support);
+if size(unique(support),1)==1
+    ll;
+    warning(['Support couldnt decide. See "voteF". Support is ' mat2str(support) '. Distances are ' mat2str(ll)]);
+end
 [~,i]=max(support);
 F=F(:,:,i);
 if verbose
-    support
+    support;
 end
 if debugg
     ll;

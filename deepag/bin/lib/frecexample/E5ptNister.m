@@ -10,6 +10,21 @@ function E = E5ptNister(X,E)
 
 if nargin>0
     if nargin<2
+        % change by Oleh Rybkin. not working
+        if false && size(X,1)==6 && size(X,2)>5
+            B = zeros(size(X,2),9);
+            % B * f = 0
+            for i=1:size(X,2)
+                B(i,:) = m2v(X(1:3,i)*X(4:6,i)');
+            end
+            % f is the null space of B
+            [~,~,f] = svd(B,0);
+            for i=1:5
+                F=reshape(f(:,i),3,3)';
+                
+            end
+            X=[U(:,1:5); V(:,1:5)];
+        end
         if all(size(X)==[6 5])
             % Exclude degeneracies due to repeated points
             s = [svd(X(1:2,:)) svd(X(4:5,:))]; s = s(end,:);

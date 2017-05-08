@@ -37,10 +37,13 @@ if verbose
     size(F,3)
 end
 %[F,A]  = uu2F({u1,u2},{'[-1,1]',method});
+support=NaN;
 if size(F,3)>1
-    [F support]=little_ransac(F,A,testset,threshold);
-else
-    support=NaN;
+    if all(any(isnan(testset{1}))) % works if testset={nan}. 
+        [F]=inliers2F(F,A,{u1 u2});
+    else
+        [F, support]=voteF(F,A,testset,threshold);
+    end
 end
 % normalization
 F = inv(A{2})'*F*inv(A{1});
