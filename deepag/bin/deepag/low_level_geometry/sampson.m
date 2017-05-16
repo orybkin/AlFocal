@@ -12,9 +12,10 @@ num=sum(u2.*F1);
 den=sqrt((F1(1,:).^2)+(F1(2,:).^2)+(F2(1,:).^2)+(F2(2,:).^2));
 err=(num./den);
 if nargout>1
+    % derivative
     F1(3,:)=0;
     F2(3,:)=0;
-    % ((u F v)/den' = 
+    % ((u F v)/den)' = 
     %   (u F v)'*den - num*den'    (u v^T)*den - num*den'
     % = ----------------------- =  ----------------------
     %             den^2                    den^2

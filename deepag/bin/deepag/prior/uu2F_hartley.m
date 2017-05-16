@@ -1,8 +1,11 @@
-function [ F, p, f, output ] = uu2F_hartley(F, u,v, f_prior, p_prior, f_min )
+function [ F, p, f, output ] = uu2F_hartley(F, u,v, f_prior, p_prior, f_min, f_ratio )
 % UU2F_HARTLEY solves 7pt problem as described in paper [Reconstruction
 % from two views using approximate calibration]
 if nargin<6
     f_min=0;
+end
+if nargin<7
+    f_ratio=1;
 end
 % transformation
 if size(u,1)<3
@@ -30,7 +33,7 @@ o=optimoptions('lsqnonlin','Display','off');
 %o=optimoptions('lsqnonlin','SpecifyObjectiveGradient',true,'Display','off');
 o.Algorithm = 'levenberg-marquardt';
 x=[newF p'];
-[x,resnorm,residual,exitflag,output]=lsqnonlin(@(x) optimizex(x,u,v,p_prior',wp,f_prior.^2,f_min.^2,w1,w2,wd,wz1,wz2), x.^2,[],[],o);
+[x,resnorm,residual,exitflag,output]=lsqnonlin(@(x) optimizex(x,u,v,p_prior',wp,f_prior.^2,f_min.^2,f_ratio^2,w1,w2,wd,wz1,wz2), x.^2,[],[],o);
 output.exitflag=exitflag;
 F=reshape(x(1:9),3,3);
 p=x(10:13);
@@ -38,11 +41,11 @@ p={p(1:2)' p(3:4)'};
 f=F2f1f2(F,p);
 end
 
-function err=optimizex(x,u,v,p_prior,wp,f_prior,f_min,w1,w2,wd,wz1,wz2)
+function err=optimizex(x,u,v,p_prior,wp,f_prior,f_min,f_ratio,w1,w2,wd,wz1,wz2)
 F=reshape(x(1:9),3,3);
 p=x(10:13);
 f=F2f1f2(F,{p(1:2)' p(3:4)'}).^2;
-errf=[w1*(f(1)-f_prior(1)) w2*(f(2)-f_prior(2)) wd*(f(1)-f(2))  wz1*(f(1)-f_min)*(f(1)<f_min)  wz2*(f(2)-f_min)*(f(2)<f_min)];
+errf=[w1*(f(1)-f_prior(1)) w2*(f(2)-f_prior(2)) wd*(f(1)*f_ratio-f(2))  wz1*(f(1)-f_min)*(f(1)<f_min)  wz2*(f(2)-f_min)*(f(2)<f_min)];
 errp=wp*(p-p_prior);
 errF=sampson(F,u,v);
 size(errf);

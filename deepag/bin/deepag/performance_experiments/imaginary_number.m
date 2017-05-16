@@ -3,45 +3,39 @@
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % CMP, 2017
 
-function [pol1,pol2,pol3,boug,truth]=focal_perf(file,corr,pop_size, method, noise)
+function [percent7]=imaginary_number(file,corr,pop_size, method, noise)
 if nargin < 1
     noise=1;
     file=['../../data/correspondences_F_synth_1K_' num2str(noise) 'noise.mat'];
-    corr=7;
+    corrs=8:40;
     pop_size=1000;
     method='Prop6';
     noise=1;
 end
-
-[pol1,pol2,pol3,boug,truth]=calcFocals(file,corr,pop_size, method, noise);
-
-pol1_err=get_foc_error(pol1,truth);
-pol2_err=get_foc_error(pol2,truth);
-pol3_err=get_foc_error(pol3,truth);
-boug_err=get_foc_error(boug,truth);
-
-
-halfimg_idx=@(x) ((imag(x(:,1)))>eps | (imag(x(:,2))))>eps;
-img_idx=@(x) ((imag(x(:,1)))>eps & (imag(x(:,2))))>eps;
-sum(img_idx(pol1))
-sum(img_idx(pol2))
-sum(img_idx(pol3))
-sum(img_idx(pol1) & img_idx(pol2) & img_idx(pol3))
+percent7=zeros(size(corrs));
+percent8=zeros(size(corrs));
+for i=1:size(corrs,2)
+    [pt7,pt8,truth]=calcFocals(file,corrs(i),pop_size, method, noise);
+    img_idx=@(x) ((imag(x(:,1)))>eps & (imag(x(:,2))))>eps;
+    percent7(i)=sum(img_idx(pt7))/pop_size;
+    percent8(i)=sum(img_idx(pt8))/pop_size;
+end
 
 % histogram errors
 figure();
-cumhist(sort(pol1_err),20,1,'-g');
 hold on
-cumhist(sort(pol2_err),20,1,'-r');
-cumhist(sort(pol3_err),20,1,'-b');
-cumhist(sort(boug_err),20,1,'-k');
+plot(corrs,percent7);
+plot(corrs,percent8);
 hold off
-legend('1','2','3','Bougnoux')
-
+xlabel('number of correspondences')
+ylabel('imaginary focal lengths, %')
+legend('7pt','8pt')
+saveas(gcf, ['../../results/imaginary_number.png']);
+saveas(gcf, ['../../results/imaginary_number.fig']);
 %toc();
 end
 
-function [pol1,pol2,pol3,baseline,truth]=calcFocals(file,corr,n,method,noise)
+function [pt7,pt8,truth]=calcFocals(file,corr,n,method,noise)
 global debugg;
 %get n focal length estimations of the bougnoux formula on corr coordinates from the data in
 %specified file
@@ -53,10 +47,8 @@ truth=[corr_tr.f corr_val.f corr_tst.f];
 norm_=[corr_tr.norm corr_val.norm corr_tst.norm];
 %truncate
 u=u(:,1:n); truth=truth(:,1:n)'; norm_=norm_(:,1:n)';
-pol1=zeros(n,2);
-pol2=zeros(n,2);
-pol3=zeros(n,2);
-baseline=zeros(n,2);
+pt7=zeros(n,2);
+pt8=zeros(n,2);
 rng(867954152); %the reason I create noise beforehand is that now I can be sure
 %for every call of this method the noise will be the same, which allows for
 %comparison
@@ -84,17 +76,12 @@ for i=1:n
     
     %calculate baseline estimation
     [Fund,A]=F_features(u1,u2,'|F|=0',testset,3,false);
-    baseline(i,:)=F2f1f2(reshape(Fund,3,3));
-    baseline(i,:)=baseline(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
+    pt7(i,:)=F2f1f2(reshape(Fund,3,3));
+    pt7(i,:)=pt7(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
     
-    pol1(i,:)=F2f1f2(reshape(Fund,3,3),{[0;0] [0;0]},'Polynomial1');
-    pol1(i,:)=pol1(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
-    
-    pol2(i,:)=F2f1f2(reshape(Fund,3,3),{[0;0] [0;0]},'Polynomial1');
-    pol2(i,:)=pol2(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
-    
-    pol3(i,:)=F2f1f2(reshape(Fund,3,3),{[0;0] [0;0]},'Polynomial3');
-    pol3(i,:)=pol3(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
+    [Fund,A]=F_features(u1,u2,'Free',testset,3,false);
+    pt8(i,:)=F2f1f2(reshape(Fund,3,3));
+    pt8(i,:)=pt8(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
     
     truth(i,:)=truth(i,:).*norm_(i,:);
     rmprintf(repS);

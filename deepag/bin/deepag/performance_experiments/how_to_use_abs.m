@@ -1,4 +1,4 @@
-% The script shows how to use absolute value of the focal length
+% The script should not have existed. The theory behind it is plain wrong.
 %
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % CMP, 2017
@@ -6,7 +6,7 @@
 function [corrected,recomputed,original,f]=how_to_use_abs(file,corr,pop_size, method, noise_out)
 if nargin < 1
     global lots_of_inliers % determines whether we supposee we will use the methods in ransac or after we found a set of inliers
-    lots_of_inliers=false;
+    lots_of_inliers=true;
     noise=1;
     file=['../../data/correspondences_F_synth_1K_' num2str(noise) 'noise.mat'];
     corr=7;
@@ -17,7 +17,7 @@ end
 
 [corrected,recomputed,original,weird,f]=calcFocals(file,corr,pop_size);
 
-img_idx=(abs(imag(f(:,1)))>eps) | (abs(imag(f(:,2)))>eps);
+img_idx=(abs(imag(f(:,1)))>eps) & (abs(imag(f(:,2)))>eps);
 
 % histogram errors
 if false
@@ -38,7 +38,7 @@ cumhist(sort(original(~img_idx)),20,1,'-g');
 cumhist(sort(corrected(img_idx)),20,1,'-g');
 cumhist(sort(recomputed(img_idx)),20,1,'-r');
 cumhist(sort(original(img_idx)),20,1,'-r');
-cumhist(sort(weird(img_idx)),20,1,'-r')
+cumhist(sort(weird(img_idx)),20,1,'-r');
 xlabel('error');
 ylabel('frequency')
 title('How to use imaginary focal length')
@@ -67,7 +67,6 @@ original=nan(n,1);
 support=zeros(n,1);
 rng(867954152); 
 global lots_of_inliers
-
 for i=1:n
       repS = adprintf({}, [num2str(i), '/', num2str(n)]);
     %reshape
@@ -91,9 +90,10 @@ for i=1:n
     F=reshape(F,3,3);
     f(i,:)=F2f1f2(F);
     f(i,:)=f(i,:)*diag([1/A{1}(1) 1/A{2}(1)]).*norm_(i,:);
+    %f(i,:)=[3000 4000];
         
     % corrected
-    [F_corr,K1,K2]=correctF(F,abs(f(i,:)));
+    [F_corr,K1,K2]=correctF(F,abs([3000 4000]));
     if norm(F/F(1)-F_corr/F_corr(1),'fro')>1e-6 & (abs(imag(f(i,1)))<eps) & (abs(imag(f(i,2)))<eps)
         norm(F/F(1)-F_corr/F_corr(1),'fro')
         f(i,:)
@@ -135,4 +135,5 @@ for i=1:n
     truth(i,:)=truth(i,:).*norm_(i,:);
     rmprintf(repS);
 end
+
 end

@@ -634,7 +634,7 @@ function [P M m mnoiseless npoints] = GenerateScene(npoints, radius, ncams, minz
         anoise = anoise*ones(1,ncams);
     end
     
-    noiseModel = 5;
+    noiseModel = 3;
     
     %add 2D noise
     for j=1:ncams

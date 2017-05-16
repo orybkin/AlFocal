@@ -26,6 +26,21 @@ testset={m{1}(:,testsample) m{2}(:,testsample)};
 F=reshape(F,3,3);
 F=F*(1+rand(3,3)/10);
 
-o=optimoptions('lsqnonlin','SpecifyObjectiveGradient',true,'Display','off','CheckGradients', true);
-o.Algorithm = 'levenberg-marquardt';
-[x,resnorm,residual,exitflag,output]=lsqnonlin(@(x) sampson(x,u1,u2), reshape(F,9,1),[],[],o);
+
+
+syms f11 f12 f13 f21 f22 f23 f31 f32 f33
+
+syms u11 u12 
+F=[f11 f12 f12;
+    f21 f22 f23;
+    f31 f32 f33];
+if size(u2,1)<3
+    u2=[u2; ones(1,size(u2,2))];
+    u1=[u1; ones(1,size(u2,2))];
+end
+F=reshape(F,3,3);
+F1=F*u1;
+F2=F'*u2;
+num=sum(u2.*F1);
+den=sqrt((F1(1,:).^2)+(F1(2,:).^2)+(F2(1,:).^2)+(F2(2,:).^2));
+err=(num./den);

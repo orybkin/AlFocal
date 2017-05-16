@@ -1,6 +1,6 @@
 function [f1o, u1o, v1o, f2o, u2o, v2o, l1, l2, err, iter] = f1_f2_from_F(F, f1prior, u1prior, v1prior,f2prior, u2prior, v2prior, w1, w2, w3, w4)
 
-niter = 50;
+niter = 150;
 
 [U,D,V] = svd(F);
 
@@ -260,8 +260,8 @@ while not_found && k<=niter
 
     
    
-    eps2 = 10e-9;
-    eps1 = 10e-9;
+    eps2 = 10e-8;
+    eps1 = 10e-8;
     eps = 10e-4;
     if (k>1 &&  abs(err(k)-err(k-1))/abs(err(k))<eps1) || (abs(err(k))<eps2)
     %if (k>1 &&  abs(err(k)-err(k-1))<eps )

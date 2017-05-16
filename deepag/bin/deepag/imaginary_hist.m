@@ -8,8 +8,9 @@
 
 function [truth,estion,transversal]=imaginary_hist(corr,pop_size, method, noise_out,noise)
 if nargin < 1
+    %is_ratio=true; %sets whether focal length or ratio is plotted
     noise=1;
-    corr=7;
+    corr=40;
     pop_size=1000;
     method='|F|=0';
     noise_out=0;
@@ -23,28 +24,18 @@ transversal=transversal(I);
 truth=truth(I,:);
 estion=estion(I,:);
 
-real=abs(imag(estion(:,1)))<eps;
+real_idx=abs(imag(estion(:,1)))<eps & abs(imag(estion(:,2)))<eps;
+imag_idx=abs(imag(estion(:,1)))>eps & abs(imag(estion(:,2)))>eps;
+halfreal=not(real_idx | imag_idx);
 ratio=abs(estion(:,1)./estion(:,2));
 gt_ratio=truth(1,1)./truth(1,2);
 
-if true
+if false
 % histogram transversal length
 figure();
 histogram(transversal,20);
 xlabel('transversal length');
 ylabel('frequency');
-
-% plot f-Ratios versus transversal length
-figure();
-plot(transversal(real),ratio(real),'bx');
-hold on
-plot(transversal(not(real)),-ratio(not(real)),'rx');
-plot([min(transversal) max(transversal)],gt_ratio*ones(1,2));
-plot([min(transversal) max(transversal)],-gt_ratio*ones(1,2));
-legend({'good','bad'})
-xlabel('transversal length');
-ylabel('focal lengths'' ratio');
-hold off
 
 % plot relative frequencies of imagninary ratios versus transversal length
 figure();
@@ -54,16 +45,46 @@ plot(counts1./counts2);
 xlabel('freq_{real}/freq_{imag}');
 end 
 
+
+% plot f-Ratios versus transversal length
+figure();
+plot(transversal(real_idx),ratio(real_idx),'bx');
+hold on
+plot(transversal(not(real_idx)),-ratio(not(real_idx)),'rx');
+plot([min(transversal) max(transversal)],gt_ratio*ones(1,2));
+plot([min(transversal) max(transversal)],-gt_ratio*ones(1,2));
+legend({'real f','imaginary f'})
+xlabel('transversal length');
+ylabel('focal lengths ratio');
+axis([0 40 -4 4])
+hold off
+
+
 fig=figure();
 % histogram errors in f-Ratio for imaginary and real results separately
 error_ratio=ratio-gt_ratio;
-h1=histogram(error_ratio(real),[-1:0.05:1.5]);
+h1=histogram(error_ratio(real_idx),[-1:0.05:1.5],'Normalization','probability');
 h1.FaceColor='b';
 hold on
-h2=histogram(error_ratio(not(real)),[-1:0.05:1.5]);
+h2=histogram(error_ratio(imag_idx),[-1:0.05:1.5],'Normalization','probability');
 h2.FaceColor='r';
 legend({'real f','imaginary f'})
 xlabel('error in ratio');
+ylabel('frequency');
+%title(['error for ' num2str(noise) ' pixel noise']);
+saveas(fig, ['../../../results/imaginary_hist.png']);
+saveas(fig, ['../../../results/imaginary_hist.fig']);
+
+fig=figure();
+% histogram errors in f-Ratio for imaginary and real results separately
+error=get_foc_error(estion,truth);
+h1=histogram((error(real_idx)),[-1:0.05:1.5]);
+h1.FaceColor='b';
+hold on
+h2=histogram(error(imag_idx),[-1:0.05:1.5]);
+h2.FaceColor='r';
+legend({'real f','imaginary f'})
+xlabel('error in focal length');
 ylabel('frequency');
 title(['error for ' num2str(noise) ' pixel noise']);
 saveas(fig, ['../../../results/error_hist_' num2str(noise) 'noise']);
@@ -85,7 +106,7 @@ transversal=zeros(n,1);
 truth=repmat([1500 2000],n,1);
 for i=1:n
     repS = adprintf({}, [num2str(i), '/', num2str(n)]);
-    [F,f1,f2,A, u,P]=getRandomF(noise,20);
+    [F,f1,f2,A, u,P]=getRandomF(noise,60);
     %reshape
     u1=u{1};
     u2=u{2};

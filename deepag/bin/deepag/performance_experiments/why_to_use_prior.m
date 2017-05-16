@@ -3,32 +3,64 @@
 % Oleh Rybkin, rybkiole@fel.cvut.cz
 % CMP, 2017
 
-function [zuzana,hartley,prior,baseline,truth]=hartley_perf(corr,pop_size, noise)
+function [hartley_ratio,hartley,prior,baseline]=hartley_ratio_perf(corr,pop_size, noise)
 if nargin < 1
     noise=1;
     corr=7;
-    pop_size=20;
+    pop_size=100;
 end
 
-addpath('./utils')
-addpath('./hartley')
-addpath('./solver')
-addpath('./scene')
+[hartley_ratio,hartley,prior,baseline]=calcFocals(noise,corr,pop_size);
 
-[zuzana,hartley,prior,baseline]=calcFocals(noise,corr,pop_size);
+% histogram iterations
+figure();
+hold on
+histhist(sort(hartley_ratio.iter),15,1,'-g');
+histhist(sort(hartley.iter),15,1,'-r');
+hold off
+xlabel('iterations')
+ylabel('frequency')
+legend('hartley ratio iterations', 'hartley iterations')
+saveas(gcf,'hartley_ratio_iterations.fig')
 
+% histogram f1
+figure();
+hold on
+histhist(sort(hartley_ratio.f(:,1)),15,1,'-g');
+histhist(sort(hartley.f(:,1)),15,1,'-r');
+hold off
+xlabel('f1')
+ylabel('frequency')
+legend('hartley ratio f', 'hartley f')
+saveas(gcf,'hartley_ratio_f1.fig')
+
+
+% histogram f2
+figure();
+hold on
+histhist(sort(hartley_ratio.f(:,2)),15,1,'-g');
+histhist(sort(hartley.f(:,2)),15,1,'-r');
+hold off
+xlabel('f2')
+ylabel('frequency')
+legend('hartley ratio f', 'hartley f')
+saveas(gcf,'hartley_ratio_f2.fig')
+
+truth=repmat([3 4],size(hartley_ratio.f,1),1);
+ratio_error=get_foc_error(hartley_ratio.f,truth);
+hartley_error=get_foc_error(hartley.f,truth);
 % histogram errors
 figure();
 hold on
-histhist(sort(zuzana.iter),20,1,'-g');
-histhist(sort(hartley.iter),20,1,'-r');
+cumhist(sort(ratio_error),15,'-g');
+cumhist(sort(hartley_error),15,'-r');
 hold off
-legend('zuzana iterations', 'hartley iterations')
+legend('hartley ratio error', 'hartley error')
 
 %toc();
 end
 
-function [zuzana,hartley,prior,baseline]=calcFocals(noise,corr,n,prior )
+function [hartley_ratio,hartley,prior,baseline]=calcFocals(noise,corr,n,prior )
 global debugg;
 %get n focal length estimations of the bougnoux formula on corr coordinates from the data in
 %specified file
@@ -36,11 +68,11 @@ prior.f=zeros(n,2);
 prior.p1=zeros(n,2);
 prior.p1=zeros(n,2);
 
-zuzana.f=zeros(n,2);
-zuzana.p1=zeros(n,2);
-zuzana.p2=zeros(n,2);
-zuzana.iter=zeros(n,1);
-zuzana.converge=zeros(n,1);
+hartley_ratio.f=zeros(n,2);
+hartley_ratio.p1=zeros(n,2);
+hartley_ratio.p2=zeros(n,2);
+hartley_ratio.iter=zeros(n,1);
+hartley_ratio.converge=zeros(n,1);
 
 hartley.f=zeros(n,2);
 hartley.p1=zeros(n,2);
@@ -85,18 +117,21 @@ for i=1:n
     [F,A]=F_features(u1,u2,'|F|=0',testset,0.001);
     F=reshape(F,3,3);
     baseline(i,:)=F2f1f2(F);
+    ratio=abs(F2ratio(F));
+    real_idx=@(x) ((imag(x(:,1))<eps) & (imag(x(:,2)))<eps);
+    img_idx=@(x) ((imag(x(:,1))>eps) & (imag(x(:,2)))>eps);
+    if ~real_idx(baseline(i,:)) && ~img_idx(baseline(i,:))
+        ratio=1;
+    end
+    
     baseline(i,:)=baseline(i,:)*diag([1/A{1}(1) 1/A{2}(1)]);
-    f1=baseline(i,1);
-    f2=baseline(i,2);
     p1=[0;0];
     p2=[0;0];
     
-    % Zuzana
+    % Priors
     f1prior =f1+ 1.5*rand(1);
     u1prior = p1(1)+0.1*rand(1);
     v1prior = p1(2)+0.1*rand(1);
-    w1 = 0.1;
-    w2 = 1;
     
     f2prior = f2+ 1.5*rand(1);
     u2prior = p2(1)+0.05*rand(1);
@@ -104,20 +139,20 @@ for i=1:n
     prior.f(i,:)=[f1prior f2prior];
     prior.p1(i,:)=[u1prior v1prior];
     prior.p2(i,:)=[u2prior v2prior];
-    w3 =0.1;
-    w4 =1;
+    % Hartley with ratio
     tic()
-    [f1_zuz, u1_zuz, v1_zuz, f2_zuz, u2_zuz, v2_zuz, l1, l2, err, iter] = f1_f2_from_F(F, f1prior, u1prior, v1prior,f2prior, u2prior, v2prior, w1, w2, w3, w4);
+    [~, p_hartley, f_hartley, output] = uu2F_hartley(F,u1,u2,[f1prior; f2prior],{[u1prior; v1prior] [u1prior; v1prior]}, 0, ratio);
     toc()
-    zuzana.converge(i)=iter>50;
-    zuzana.iter(i)=iter;
-    zuzana.f(i,:)=[f1_zuz f2_zuz];
-    zuzana.p1(i,:)=[u1_zuz v1_zuz];
-    zuzana.p2(i,:)=[u2_zuz v2_zuz];
+    hartley_ratio.converge(i)=output.exitflag;
+    hartley_ratio.iter(i)=output.iterations;
+    hartley_ratio.f(i,:)=f_hartley;
+    hartley_ratio.p1(i,:)=p_hartley{1}';
+    hartley_ratio.p2(i,:)=p_hartley{2}';
+    norm(f_hartley-[f1 f2])
     
     % Hartley
     tic()
-    [F, p_hartley, f_hartley, output] = uu2F_hartley(F,u1,u2,[f1prior; f2prior],{[u1prior; v1prior] [u1prior; v1prior]});
+    [~, p_hartley, f_hartley, output] = uu2F_hartley(F,u1,u2,[f1prior; f2prior],{[u1prior; v1prior] [u1prior; v1prior]});
     toc()
     hartley.converge(i)=output.exitflag;
     hartley.iter(i)=output.iterations;
@@ -127,5 +162,6 @@ for i=1:n
     norm(f_hartley-[f1 f2])
     
     rmprintf(repS);
-end
+    end
+
 end

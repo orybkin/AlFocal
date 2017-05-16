@@ -54,13 +54,13 @@ stat_data(:,4)=[getstd(propReal) getstd(propImg)];
 %toc();
 %plot
 if plotting
-    scatter(abs(estion(real_idx,1)),abs(estion(real_idx,2)),'b+','DisplayName','real focal');
+    scatter(abs(estion(real_idx,1)),abs(estion(real_idx,2)),'b+','DisplayName','real f');
     hold on
     if any(img_idx==1)
-        scatter(abs(estion(img_idx,1)),abs(estion(img_idx,2)),'r+','DisplayName','abs(imaginary focal)');
+        scatter(abs(estion(img_idx,1)),abs(estion(img_idx,2)),'r+','DisplayName','imaginary f');
     end
-    scatter(1500,2000,40,'go','DisplayName','ground truth');
-    plot([0 3000],[0 4000],'y','DisplayName','correct proportion line');
+    scatter(1500,2000,40,'go','DisplayName','ground truth','MarkerSize',10);
+    plot([0 3000],[0 4000],'g','DisplayName','correct proportion line');
     axis([0 4000 0 4000]);
     %triffles
     [~,~]=legend('-DynamicLegend'); % don't change this line - it fixes a Matlab bug

@@ -27,7 +27,7 @@ params=size(param,2);
 noises=size(noise,2);
 N=floor(sqrt(noises));
 M=ceil(noises/N);
-[estion,truth]=calcFocals(corr,pop_size, method, noise,param);
+[ratio,estion,truth]=calcFocals(corr,pop_size, method, noise,param);
 
 % plot focal errors
 figure();
@@ -39,54 +39,77 @@ for j=1:noises
     title(['noise ' num2str(noise(j)) 'px']);
     xlabel('error magnitude');
     ylabel('frequency, %');
+    grid on
+    grid minor
 end
 if parallel_axes
-    legend(arrayfun(@(x) {[num2str(x) char(176)]},param))
+    legend(arrayfun(@(x) {[num2str(x)]},param)) % char(176)]
     saveas(gcf, ['../../../results/foc_err_parallel_axes.png']);
+    saveas(gcf, ['../../../results/foc_err_parallel_axes.fig']);
 else
-    legend(arrayfun(@(x) {[num2str(x) ' cm']},param))
+    legend(arrayfun(@(x) {[num2str(x)]},param)) % ' cm'
     saveas(gcf, ['../../../results/foc_err_intersecting_axes.png']);
+    saveas(gcf, ['../../../results/foc_err_intersecting_axes.fig']);
 end
 %suptitle('errors in focal length w.r.t. axes distance')
-
-% plot mult ratio errors
-figure();
-for j=1:noises
-    subplot(N,M,j);
-    for i=1:params
-        cumhist(sort(get_rat_error_mult(estion(:,:,i,j),truth)),20,2,[colors{i}]);
+if true
+    % plot mult ratio errors
+    figure();
+    for j=1:noises
+        subplot(N,M,j);
+        for i=1:params
+            cumhist(sort(get_rat_error_mult(estion(:,:,i,j),truth)),20,2,[colors{i}]);
+        end
+        title(['noise ' num2str(noise(j)) 'px']);
+        xlabel('error magnitude');
+        ylabel('frequency, %');
     end
-    title(['noise ' num2str(noise(j)) 'px']);
-    xlabel('error magnitude');
-    ylabel('frequency, %');
-end
-legend(arrayfun(@(x) {num2str(x)},param))
-suptitle('multiplicative errors in ratio w.r.t. axes distance')
+    legend(arrayfun(@(x) {num2str(x)},param))
+    suptitle('multiplicative errors in ratio w.r.t. axes distance')
 
-% plot add ratio errors
-figure();
-for j=1:noises
-    subplot(N,M,j);
-    for i=1:params
-        cumhist(sort(get_rat_error_add(estion(:,:,i,j),truth)),20,2,[colors{i}]);
+    % plot add ratio errors
+    figure();
+    for j=1:noises
+        subplot(N,M,j);
+        for i=1:params
+            cumhist(sort(get_rat_error_add(estion(:,:,i,j),truth)),20,2,[colors{i}]);
+        end
+        title(['noise ' num2str(noise(j)) 'px']);
+        xlabel('error magnitude');
+        ylabel('frequency, %');
+        xlim([-1,1]);
     end
-    title(['noise ' num2str(noise(j)) 'px']);
-    xlabel('error magnitude');
-    ylabel('frequency, %');
-    xlim([-1,1]);
+    legend(arrayfun(@(x) {num2str(x)},param))
+    suptitle('additive errors in ratio w.r.t. axes distance')
+    
+     % plot add ratio computed directly errors 
+    figure();
+    for j=1:noises
+        subplot(N,M,j);
+        for i=1:params
+            estdata=abs(ratio(:,:,i,j))-abs(truth(:,1)./truth(:,2));
+            % remove outliers
+            estdata=estdata(estdata<10);
+            cumhist(sort(estdata),20,2,[colors{i}]);
+        end
+        title(['noise ' num2str(noise(j)) 'px']);
+        xlabel('error magnitude');
+        ylabel('frequency, %');
+        xlim([-1,1]);
+    end
+    legend(arrayfun(@(x) {num2str(x)},param))
+    suptitle('additive errors in ratio w.r.t. axes distance')
 end
-legend(arrayfun(@(x) {num2str(x)},param))
-suptitle('additive errors in ratio w.r.t. axes distance')
-
 end
 
-function [estion,truth]=calcFocals(corr,n,method,noise,axdist)
+function [ratio,estion,truth]=calcFocals(corr,n,method,noise,axdist)
 %get n focal length estimations of the bougnoux formula on corr coordinates from the data in
 %specified file
 
 axdists=size(axdist,2);
 noises=size(noise,2);
 estion=zeros(n,2,axdists,noises);
+ratio=zeros(n,1,axdists,noises);
 truth=zeros(n,2);
 
 rng(867954152);
@@ -100,7 +123,11 @@ for i=1:n
     [X, K]=getPoints(truth);
     for j=1:axdists
         for k=1:noises
-            [~,estion(i,:,j,k)]=getF(X,K,noise(k),method,corr,axdist(j));
+            [F,A]=getF(X,K,noise(k),method,corr,axdist(j));
+            
+            F_t = inv(A{2})'*reshape(F,3,3)*inv(A{1});
+            estion(i,:,j,k)=F2f1f2(F_t)*diag([1/A{1}(1) 1/A{2}(1)]);
+            ratio(i,:,j,k)=F2ratio(F_t);
         end
     end
     
@@ -123,7 +150,7 @@ K2 = [f(2) 0  0
 K={K1,K2};
 end
 
-function [F, f]=getF(X,K,noise,method,points,axdist)
+function [F, A]=getF(X,K,noise,method,points,axdist)
 global parallel_axes;
 % the distances are measured in cm
 if parallel_axes
@@ -154,6 +181,4 @@ u1(1:2,:)=u1(1:2,:)+noise*randn(size(u1(1:2,:)));
 u2(1:2,:)=u2(1:2,:)+noise*randn(size(u2(1:2,:)));
 % Fundamental matrix
 [F,A]=F_features(u1(:,1:points),u2(:,1:points),method,{u1(:,points:end),u2(:,points:end)});
-F_t = inv(A{2})'*reshape(F,3,3)*inv(A{1});
-f=F2f1f2(F_t)*diag([1/A{1}(1) 1/A{2}(1)]);
 end

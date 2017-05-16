@@ -5,7 +5,7 @@
 %% generating
 sceneType = {'randombox' 'random'};
 pixel = 1/1000;
-noise = 1*pixel;  noise=1;
+noise = 1*pixel;  %noise=0;
 Npoints = 20;
 Ncams = 2;
 samplesize = 7;
