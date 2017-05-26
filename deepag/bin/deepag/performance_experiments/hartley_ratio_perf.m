@@ -52,13 +52,14 @@ hartley_error=get_foc_error(hartley.f,truth);
 % histogram errors
 figure();
 hold on
-cumhist(sort(ratio_error),15,'-g');
-cumhist(sort(hartley_error),15,'-r');
+cumhist(sort(ratio_error),15,1,'-g');
+cumhist(sort(hartley_error),15,1,'-r');
 hold off
 xlabel('error')
-ylabel('cumulative frequency')
-legend('hartley ratio error', 'hartley error')
-saveas(gcf,'hartley_ratio_error.fig')
+ylabel('cumulative probability')
+legend('Hartley with ratio', 'Hartley')
+saveas(gcf,'../../../results/hartley_ratio_error.fig')
+saveas(gcf,'../../../results/hartley_ratio_error.png')
 
 %toc();
 end

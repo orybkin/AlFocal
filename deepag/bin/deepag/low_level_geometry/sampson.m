@@ -1,4 +1,4 @@
-function [err,J]=sampson(F,u1,u2)
+function [err]=sampson(F,u1,u2)
 % calculates the sampson error
 
 if size(u2,1)<3
@@ -12,7 +12,7 @@ num=sum(u2.*F1);
 den=sqrt((F1(1,:).^2)+(F1(2,:).^2)+(F2(1,:).^2)+(F2(2,:).^2));
 err=(num./den);
 if nargout>1
-    % derivative
+    % derivative. doesn't work
     F1(3,:)=0;
     F2(3,:)=0;
     % ((u F v)/den)' = 

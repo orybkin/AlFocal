@@ -27,10 +27,10 @@ hold on
 plot(corrs,percent7);
 plot(corrs,percent8);
 hold off
-xlabel('number of correspondences')
-ylabel('imaginary focal lengths, %')
+xlabel('number of correspondences used')
+ylabel('imaginary focal lengths')
 legend('7pt','8pt')
-saveas(gcf, ['../../results/imaginary_number.png']);
+saveas(gcf, ['../../results/imaginary_number.jpg']);
 saveas(gcf, ['../../results/imaginary_number.fig']);
 %toc();
 end

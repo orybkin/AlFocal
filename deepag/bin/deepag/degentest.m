@@ -1,3 +1,4 @@
+
 % The script gives an example of degeneration in the sense of 
 % [On the existence of Epipolar Matrices], theorem 2.2
 % turns out the the situation described there for 7 points does not define

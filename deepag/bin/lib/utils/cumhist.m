@@ -24,7 +24,7 @@
 %       Status       : Ready ($Source: /home/cvs/Matlab/utils/cumhist.m,v $)
 %
 %
-function [N,X,cX,f]=cumhist(mat,hnum,mode,~)
+function [N,X,cX,f]=cumhist(mat,hnum,mode,color)
 
 if nargin < 3
     mode = 0;
@@ -43,10 +43,10 @@ if mode == 0
     plot(X,cX/max(N));
 elseif mode==1
    % bar(X,N/cX(end));
-    plot(X,cX/cX(end));
+    plot(X,cX/cX(end),color);
 else
    % bar(X,N);
-    plot(X,cX);
+    plot(X,cX,2,color);
 end
 hold off
 

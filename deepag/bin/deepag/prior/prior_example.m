@@ -59,6 +59,7 @@ tic()
 toc()
 output.iterations
 norm(f_hartley-[f1 f2])
+f_hartley
 %%
 norm([f1 f2]-[f1prior f2prior])
 

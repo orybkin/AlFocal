@@ -10,7 +10,7 @@ if nargin < 1
     corr=7;
     pop_size=100;
     method='Prop6';
-    noise_out=10;
+    noise_out=0;
 end
 
 [best, estion,support,baseline,truth]=calcFocals(file,corr,pop_size, method, noise_out);
@@ -24,9 +24,18 @@ figure();
 cumhist(sort(estdata),20,1,'-g');
 hold on
 cumhist(sort(basedata),20,1,'-r');
-cumhist(sort(bestdata),20,1,'-b');
+%cumhist(sort(bestdata),20,1,'-b');
 hold off
-legend('6-Ratio','7pt','best among 6-Ratio')
+legend('6-Ratio','7pt') %,'best among 6-Ratio')
+xlabel('error')
+ylabel('probability')
+if noise_out==0
+    saveas(gcf,'../../../results/ratio6_nonoise.fig')
+    saveas(gcf,'../../../results/ratio6_nonoise.eps', 'epsc')
+else
+    saveas(gcf,'../../../results/ratio6_10noise.fig')
+    saveas(gcf,'../../../results/ratio6_10noise.eps', 'epsc')
+end
     
 if false
     figure();

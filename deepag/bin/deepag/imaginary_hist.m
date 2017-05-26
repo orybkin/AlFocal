@@ -10,7 +10,7 @@ function [truth,estion,transversal]=imaginary_hist(corr,pop_size, method, noise_
 if nargin < 1
     %is_ratio=true; %sets whether focal length or ratio is plotted
     noise=1;
-    corr=40;
+    corr=7;
     pop_size=1000;
     method='|F|=0';
     noise_out=0;
@@ -58,37 +58,39 @@ xlabel('transversal length');
 ylabel('focal lengths ratio');
 axis([0 40 -4 4])
 hold off
+saveas(gcf, ['../../../results/scatter_imaginary.jpg']);
+saveas(gcf, ['../../../results/scatter_imaginary.fig']);
 
 
 fig=figure();
-% histogram errors in f-Ratio for imaginary and real results separately
+% histogram errors in ratio for imaginary and real results separately
 error_ratio=ratio-gt_ratio;
-h1=histogram(error_ratio(real_idx),[-1:0.05:1.5],'Normalization','probability');
+h1=histogram(error_ratio(real_idx),[-1:0.05:1.5]);
 h1.FaceColor='b';
 hold on
-h2=histogram(error_ratio(imag_idx),[-1:0.05:1.5],'Normalization','probability');
+h2=histogram(error_ratio(imag_idx),[-1:0.05:1.5]); % ,'Normalization','probability'
 h2.FaceColor='r';
 legend({'real f','imaginary f'})
 xlabel('error in ratio');
-ylabel('frequency');
+ylabel('probability');
 %title(['error for ' num2str(noise) ' pixel noise']);
-saveas(fig, ['../../../results/imaginary_hist.png']);
-saveas(fig, ['../../../results/imaginary_hist.fig']);
+saveas(fig, ['../../../results/imaginary_hist_ratio.png']);
+saveas(fig, ['../../../results/imaginary_hist_ratio.fig']);
 
-fig=figure();
-% histogram errors in f-Ratio for imaginary and real results separately
-error=get_foc_error(estion,truth);
-h1=histogram((error(real_idx)),[-1:0.05:1.5]);
-h1.FaceColor='b';
-hold on
-h2=histogram(error(imag_idx),[-1:0.05:1.5]);
-h2.FaceColor='r';
-legend({'real f','imaginary f'})
-xlabel('error in focal length');
-ylabel('frequency');
-title(['error for ' num2str(noise) ' pixel noise']);
-saveas(fig, ['../../../results/error_hist_' num2str(noise) 'noise']);
-saveas(fig, ['../../../results/imaginary_hist.png']);
+if true
+    fig=figure();
+    % histogram errors in f for imaginary and real results separately
+    error=get_foc_error(estion,truth);
+    h1=histogram((error(real_idx)),[0:0.05:1]);
+    h1.FaceColor='b';
+    hold on
+    h2=histogram(error(imag_idx),[0:0.05:1]);
+    h2.FaceColor='r';
+    legend({'real f','imaginary f'})
+    %title(['error for ' num2str(noise) ' pixel noise']);
+saveas(gcf, ['../../../results/imaginary_hist.eps'], 'epsc');
+saveas(gcf, ['../../../results/imaginary_hist.fig']);
+end
 end
 
 function [truth,estion,transversal]=calcFocals(noise,corr,n,method,noise_out)

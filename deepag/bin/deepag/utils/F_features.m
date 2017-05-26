@@ -42,7 +42,8 @@ if size(F,3)>1
     if all(any(isnan(testset{1}))) % works if testset={nan}. 
         [F]=inliers2F(F,A,{u1 u2});
     else
-        [F, support]=voteF(F,A,testset,threshold);
+        [F]=inliers2F(F,A,testset);
+        %[F, support]=voteF(F,A,testset,threshold);
     end
 end
 % normalization

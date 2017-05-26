@@ -14,10 +14,7 @@ if strcmp(method,'Free') && corr<8
     stat_data=nan(2,4);
     return;
 end
-geometricError=true;
 [estion,truth]=calcFocals(file,corr,pop_size, method, noise);
-estion(:,1)./estion(:,2);
-%truth(:,1)./truth(:,2)
 
 tic();
 focalscell=num2cell(estion,2);
@@ -25,32 +22,24 @@ real_idx=cellfun(@isreal,focalscell);
 img_idx=logical(1-real_idx);
 
 %calculate statistical data
-getprop=@(x) abs(x(:,1))./abs(x(:,2));
-divf=@(x,y) abs(x)./abs(y);
-diff=@(x,y) abs(x)-abs(y);
-if ~geometricError
-    divf=diff;
-    abs_=@abs;
-else
-    abs_=@multabs;
-end
-prop_errs=divf(estion,truth);   
-%vec - vector, the focal lengths themselves, prop - their proportion f1/f2
-vec_prop=@(a,b) deal(divf(a,b),diff(getprop(a),getprop(b)));
-[vecImg, propImg]=vec_prop(estion(img_idx,:),truth(img_idx,:));
-[vecReal, propReal]=vec_prop(estion(real_idx,:),truth(real_idx,:));
-rectify=@(x) reshape(x',[],1);
-data{1}=rectify(vecReal);
-data{2}=rectify(vecImg);
-data{3}=propReal;
-data{4}=propImg;
+get_ratio=@(x) abs(x(:,1))./abs(x(:,2));
+ratio_estion=get_ratio(estion);
+ratio_truth=get_ratio(truth);
+
+error=@(x,y) abs(abs(x(:,1))-abs(y(:,1)));
+foc_error=error(estion,truth);
+rat_error=error(ratio_estion, ratio_truth);
+data{1}=foc_error(real_idx);
+data{2}=foc_error(img_idx);
+data{3}=rat_error(real_idx);
+data{4}=rat_error(img_idx);
 %
 getmean=@(x)  mean(mean(x,1));
 getstd=@(x)  mean(std(x,[],1));
-stat_data(:,1)=[abs_(getmean(vecReal)) abs_(getmean(vecImg))];
-stat_data(:,2)=[getstd(vecReal) getstd(vecImg)];
-stat_data(:,3)=[getmean(propReal) getmean(propImg)];
-stat_data(:,4)=[getstd(propReal) getstd(propImg)];
+stat_data(:,1)=[(getmean(data{1})) (getmean(data{2}))];
+stat_data(:,2)=[getstd(data{1}) getstd(data{2})];
+stat_data(:,3)=[getmean(data{3}) getmean(data{4})];
+stat_data(:,4)=[getstd(data{3}) getstd(data{4})];
 %toc();
 %plot
 if plotting
@@ -59,7 +48,7 @@ if plotting
     if any(img_idx==1)
         scatter(abs(estion(img_idx,1)),abs(estion(img_idx,2)),'r+','DisplayName','imaginary f');
     end
-    scatter(1500,2000,40,'go','DisplayName','ground truth','MarkerSize',10);
+    scatter(1500,2000,60,'filled','go','DisplayName','ground truth','LineWidth',5);
     plot([0 3000],[0 4000],'g','DisplayName','correct proportion line');
     axis([0 4000 0 4000]);
     %triffles

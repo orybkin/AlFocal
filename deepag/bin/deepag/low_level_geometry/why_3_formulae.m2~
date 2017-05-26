@@ -20,7 +20,7 @@ K2 = matrix{{f2, 0, 0}, {0, f2, 0}, {0, 0, 1}}
 E = transpose(K2)*F*K1 -- Essential matrix
 IF = ideal det F
 dim IF, codim IF, degree IF
-G = ideal(det(E)) + minors(1, 2*E*transpose(E)*E - trace(E*transpose(E))*E); 
+G = ideal(det(E)) + minors(1, 2*E*transpose(E)*E - trace(E*transpose(E))*E); -- Epipolar condition
 dim G, codim G, degree G
 Gs = saturate(G,ideal(f1*f2)); -- det(K1),det(K2) are non-zero
 -- Gs = Gs + ideal(f33-1)
@@ -39,6 +39,47 @@ s1 = mingens gb eliminate(Gs,f2)
 (m21,c21) = coefficients(s2_1_0,Variables=>{f2}) -- extract coefficients 
 (m22,c22) = coefficients(s2_2_0,Variables=>{f2}) -- extract coefficients
 (m23,c23) = coefficients(s2_3_0,Variables=>{f2}) -- extract coefficients
+-- Why are there 3 formulas?  
+-- 1st row
+sub(c11,{f11=>0,f12=>0,f13=>0}) -- p f^2 + q = 0
+sub(c12,{f11=>0,f12=>0,f13=>0}) -- p f^2 + q = 0
+sub(c13,{f11=>0,f12=>0,f13=>0}) -- p f^2 + q = 0
+-- 2nd row
+sub(c11,{f21=>0,f22=>0,f23=>0}) -- p f^2 + q = 0
+sub(c12,{f21=>0,f22=>0,f23=>0}) -- p f^2 + q = 0
+sub(c13,{f21=>0,f22=>0,f23=>0}) -- p f^2 + q = 0
+-- 3rd row
+sub(c11,{f31=>0,f32=>0,f33=>0}) -- 0 f^2 + 0 = 0
+sub(c12,{f31=>0,f32=>0,f33=>0}) -- 0 f^2 + 0 = 0
+sub(c13,{f31=>0,f32=>0,f33=>0}) -- 0 f^2 + 0 = 0
+-- 1st column
+sub(c11,{f11=>0,f21=>0,f31=>0}) -- p f^2 + q = 0
+sub(c12,{f11=>0,f21=>0,f31=>0}) -- 0 f^2 + 0 = 0
+sub(c13,{f11=>0,f21=>0,f31=>0}) -- 0 f^2 + 0 = 0
+-- 2nd column
+sub(c11,{f12=>0,f22=>0,f32=>0}) -- 0 f^2 + 0 = 0
+sub(c12,{f12=>0,f22=>0,f32=>0}) -- p f^2 + q = 0
+sub(c13,{f12=>0,f22=>0,f32=>0}) -- 0 f^2 + 0 = 0
+-- 3rd column
+sub(c11,{f13=>0,f23=>0,f33=>0}) -- 0 f^2 + 0 = 0
+sub(c12,{f13=>0,f23=>0,f33=>0}) -- 0 f^2 + 0 = 0
+dn=sub(c13,{f13=>0,f23=>0,f33=>0}) -- p f^2 + 0 = 0
+
+-- First example
+sub(c11,{f11=>0,f12=>0, f13=>0, f21=>0, f23=>0, f31=>0, f32=>0}) -- 0 f^2 + 0 = 0
+sub(c12,{f11=>0,f12=>0, f13=>0, f21=>0, f23=>0, f31=>0, f32=>0}) -- 0 f^2 + 0 = 0
+sub(c13,{f11=>0,f12=>0, f13=>0, f21=>0, f23=>0, f31=>0, f32=>0}) -- p f^2 + 0 = 0
+
+-- Second example
+sub(c11,{f22=>0,f12=>0, f13=>0, f21=>0, f23=>0, f31=>0, f32=>0}) -- 0 f^2 + 0 = 0
+sub(c12,{f22=>0,f12=>0, f13=>0, f21=>0, f23=>0, f31=>0, f32=>0}) -- 0 f^2 + 0 = 0
+sub(c13,{f22=>0,f12=>0, f13=>0, f21=>0, f23=>0, f31=>0, f32=>0}) -- p f^2 + 0 = 0
+
+
+sub(c11,{f33=>0})
+sub(c12,{f33=>0})
+sub(c13,{f33=>0})
+
 -- Bougnoux formula for f1, f2
 xx = x -> matrix{{0,- x_2,x_1},{x_2,0,- x_0},{- x_1,x_0,0}}
 p1 = matrix{{0},{0},{1}}
@@ -61,11 +102,10 @@ fl1=1500
 fl2=2000
 K1 = matrix{{fl1,0,0},{0,fl1,0},{0,0,1}}
 K2 = matrix{{fl2,0,0},{0,fl2,0},{0,0,1}}
-R2 = matrix{{0,1,0},{-3/5,0,4/5},{4/5,0,3/5}} * matrix{{1,0,0},{0,3/5,-4/5},{0,4/5,3/5}}
-
+R2 = matrix{{0,1,0},{-3/5,0,4/5},{4/5,0,3/5}} * matrix{{1,0,0},{0,3/5,-4/5},{0,4/5,3/5}} ** R
 R1 = id_(R^3)
 points=7
-X  = matrix(fillMatrix(mutableMatrix(CC,4,points)))
+X  = matrix(fillMatrix(mutableMatrix(QQ,4,points)))
 X =  mutableMatrix for i from 0 to points-1 list (1/X_i_3)*(X_i)
 for i from 0 to points-1 do X_(2,i)=X_(2,i)+3
 X = matrix X
@@ -102,47 +142,3 @@ mingens gb De
 GA = G + IA
 mingens gb GA
 dim GA, codim GA, degree GA
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

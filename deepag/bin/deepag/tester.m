@@ -24,8 +24,9 @@ u2=m{2}(:,sample);
 testset={m{1}(:,testsample) m{2}(:,testsample)};
 [F,A]=F_features(u1,u2,'|F|=0',testset,0.001);
 F=reshape(F,3,3);
+f=F2f1f2(F)
 F=F*(1+rand(3,3)/10);
 
-o=optimoptions('lsqnonlin','SpecifyObjectiveGradient',true,'Display','off','CheckGradients', true);
-o.Algorithm = 'levenberg-marquardt';
-[x,resnorm,residual,exitflag,output]=lsqnonlin(@(x) sampson(x,u1,u2), reshape(F,9,1),[],[],o);
+
+[F,A]=uu2F_sampson(u1,u2);
+f=F2f1f2(F)

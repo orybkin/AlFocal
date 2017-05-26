@@ -11,37 +11,35 @@ deepagpaths;
 %% calculating
 % what will be on X axis of the grpahs - either correspondences or levels of noise
 key='corrs';
-%key='noise';
+key='noise';
 % set parameters
 if key=='corrs'
     % numbers of correspondences - x axis
     corresp=[7:17 18:3:29 30:5:49 50:10:100];
-    corresp=[7:20];
+    corresp=[7:40];
     %corresp=[8:12];
     %corresp=[7:12];
     %corresp=[7 8];
     noise=1*ones(size(corresp));
-    file=cell(size(corresp));
-    for i=1:size(noise,2)
-        file{i}=['../../data/correspondences_F_synth_1K_' num2str(noise(i)) 'noise.mat'];
-    end
+    key_values=corresp;
 else
-    noise=[0 0.5 1 2 3 6];
-    file=cell(size(noise));
-    for i=1:size(noise,2)
-        file{i}=['../../data/correspondences_F_synth_1K_' num2str(noise(i)) 'noise.mat'];
-    end
+    noise=[0 0.5 1 1.5 2 3 6];
     corresp=8*ones(size(noise));
+    key_values=noise;
+end
+file=cell(size(noise));
+for i=1:size(noise,2)
+    file{i}=['../../data/correspondences_F_synth_1K_' num2str(noise(i)) 'noise.mat'];
 end
 
 
-plot_data=true; % turn on if you want to see data for each focal length computation scatter plotted.
+plot_data=false; % turn on if you want to see data for each focal length computation scatter plotted.
 methods={'Free' '|F|=0' 'Prop' 'Prop6'};
 methods={'Free' '|F|=0'};
 
 %noise added to the first point in the first picture (in sigmas)
 noise_out=0*ones(size(corresp));
-pop_size=300; % number of points that will be on scatter plot
+pop_size=1000; % number of points that will be on scatter plot
 n=size(corresp,2); % x axis length
 m=size(methods,2);
 clear data stat_data
@@ -80,7 +78,7 @@ clear titles legends ylabels names
 
 titles(1)={'Error of estimating (f1,f2)'};
 legends(1,:)=methods;
-ylabels(1)={'mean of f1/f1_{true}'};
+ylabels(1)={'error'};
 names(1)={'bougnoux/error'};
 
 titles(2)={'Std of estimating (f1,f2)'};
@@ -99,21 +97,22 @@ ylabels(4)={'std of f1/f2-f1_{true}/f2_{true}'};
 names(4)={[names{2} '_proportion']};
 
 
-for i=1:4
+for i=1:1 % switch for 1:4 for more statistics
     colours={'b', 'k', 'r', 'g'};
+    clf
+    hold on
     if 1
         for j=1:size(methods,2)
-            if key=='corrs'
-                plot(corresp,abs(stat_data(j*2-1,:,i)),[colours{j} 'x--']); %real
-            else
-                plot(noise,abs(stat_data(j*2-1,:,i)),[colours{j} 'x--']); %real
-            end
-            hold on
+            %plot(key_values,(stat_data(j*2-1,:,i)),[colours{j} 'x-']); %mean
+            plot(key_values, cellfun(@(x) quantile(x,0.75),data(j*2-1,:,1)), [colours{j} 'x--']); %upper quantile
+            plot(key_values, cellfun(@(x) quantile(x,0.50),data(j*2-1,:,1)), [colours{j} 'x-']); %median
+            plot(key_values, cellfun(@(x) quantile(x,0.25),data(j*2-1,:,1)), [colours{j} 'x-.']); %real
         end
     else
+        % old code plotting imaginary, real, and both
         for j=1:size(methods,2)/2
             numimag=cellfun(@(x) size(x,1),data(j*2,:,1));
-            numreal=cellfun(@(x) size(x,1),data(j*2-1,:,1));
+            numreal=cellfun(@(x) size(x,1),data(j*2-1,:,1));    
             both=numimag+numreal;
             %plot(corresp,abs([stat_data(j*2,:,i).*numimag + stat_data(j*2-1,:,i).*numreal]./both),[colours{j} 'x-']); %both
             plot(corresp,abs(stat_data(j*2-1,:,i)),[colours{j} 'x--']); %real
@@ -127,9 +126,19 @@ for i=1:4
     legend(legends(i,:));
     title(titles(i));
     if key=='corrs'
-        xlabel('number of correspondences');
+        legend('8pt 0.75 quantile','8pt median','8pt 0.25 quantile', '7pt 0.75 quantile','7pt median','7pt 0.25 quantile')
+        title('')
+        xlabel('number of correspondences used');
+        ylabel('error in focal length');
+        saveas(gcf,'../../../results/mean_error_corrs.fig')
+        saveas(gcf,'../../../results/mean_error_corrs.eps', 'epsc')
     else 
-        xlabel('level of noise');
+        xlabel('level of noise \sigma');
+        ylabel('error in focal length');
+        legend('8pt 0.75 quantile','8pt median','8pt 0.25 quantile', '7pt 0.75 quantile','7pt median','7pt 0.25 quantile')
+        title('')
+        saveas(gcf,'../../../results/mean_error_noise.fig')
+        saveas(gcf,'../../../results/mean_error_noise.eps', 'epsc')
     end
     ylabel(ylabels(i));
     saveas(gcf,[names{i} '.fig']);

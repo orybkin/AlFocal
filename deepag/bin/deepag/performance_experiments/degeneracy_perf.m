@@ -20,7 +20,7 @@ if nargin < 1
         param=[0 0.1 0.2 0.5 1 2 5 10 50];
     end
     %axdist=[0 0.2 1 5];
-    colors={'-' '.-' '-' '.-' '-' '.-' '-' '.-' '-' '.-' '-' '.-'};
+    colors={'r' 'g' 'b' 'm' 'c' 'k' 'y' '-r' '-g' '-b' '-m' '-c' '-k' '-y'};
 end
 
 params=size(param,2);
