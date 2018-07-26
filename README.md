@@ -35,6 +35,8 @@ It also makes heavy use of the toolkit for camera geometry privately developed b
  - `*.pbs`: Script filed used to submit jobs to the cluster.
  - `Whiteboard-*.jpg`: Captured whiteboards after some discussions.
 
-## Example figure
+## Some results
+
+This figure shows that one of our methods (red) finds a good tradeoff between a biased (blue) and a noisy (pink) estimate, while being robust to noise in the prior belief about the focal length.
 
 ![alt text](https://github.com/orybkin/AlFocal/blob/master/results/opt_comp_f1.jpg "Figure")
