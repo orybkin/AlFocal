@@ -34,3 +34,7 @@ It also makes heavy use of the toolkit for camera geometry privately developed b
  - `coef_mat_two_focal.m`: Matlab function generating feature vector from seven correspondences as Zuzana sent it.
  - `*.pbs`: Script filed used to submit jobs to the cluster.
  - `Whiteboard-*.jpg`: Captured whiteboards after some discussions.
+
+## Example figure
+
+![alt text](https://github.com/orybkin/AlFocal/blob/master/results/opt_comp_f1.jpg "Figure")
