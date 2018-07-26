@@ -1,10 +1,13 @@
-# Algebraic Focals - analysis of focal lengths computation from minimal correspondences #
+# Algebraic estimation of Focal length 
 
-## The project grew out of Pavel Trutman's work here ##
-https://github.com/PavelTrutman/FocalNet
+These are the tools I developed while working on my Bachelor's thesis on Robust Focal Length Estimation. For more information about the project, see the thesis repo at https://github.com/orybkin/Bachelor-Thesis.
 
-## Git repository ##
-To keep track of the changes in the code, the Git tool is used. Data folders are excluded from this repository because of the large size of the files. Please do not forget to set up your name and e-mail before first commit: `git config --global user.name "John Doe"`, `git config --global user.email johndoe@example.com`.
+The project was developed in MatLab. It contains implementations of multiple methods for camera focal length estimation. It also contains the framework for evaluation of the methods and various plotting scripts. All figures in the thesis are reproducible via respective scripts.
+
+## References
+The project grew out of Pavel Trutman's work on applying deep learning to the focal length estimation here: https://github.com/PavelTrutman/FocalNet
+
+It also makes heavy use of the toolkit for camera geometry privately developed by the group of Tomas Pajdla (under a free license).
 
 ## Folder structure ##
  - `deepag/`
